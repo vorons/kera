@@ -6,6 +6,26 @@ nobody repeats it (ground rule 1). Newest first.
 Each entry: the date, what was tried, on which machine and model, the numbers,
 why it failed (if known), and what was decided.
 
+## N-020: Clover-35B-A3B-Preview is a newer model than llama.cpp understands (2026-11-18)
+
+**Tried.** `kera serve -m Clover-35B-A3B-Preview-Q4_0.gguf --stream kera --stream-budget-gb 3000` on this Linux
+computer, with llama.cpp b12500 (the engine in 0.1.5.3).
+
+**Result.** Loading stopped twice. First the loader asked for `clover_moe.expert_shared_count`, which this file
+does not have. A local fallback that inferred one shared expert from the shared-expert tensors was tried and
+removed again: with it, loading reached the tensors and stopped at `wrong number of tensors; expected 853, got 733`.
+
+**Why.** The file is a newer or custom Clover variant. It has 40 layers, 256 experts with 8 used per word and one
+shared-expert set per layer; it carries `clover_moe.moe_block_coreset_enabled`, `..._top_p` and `block_size`,
+which b12500 does not read. Each of its 30 linear-attention layers has four tensors that neither b12500 nor the
+current llama.cpp master names: `ssm_bd_history.weight`, `ssm_bd_history.bias`, `ssm_bd_logit_scale.weight` and
+`ssm_conv1d.weight_right` (120 tensors in all). b12500's Clover graph has no operation for them. Telling the
+loader to ignore the extra tensors would make the model run, but on a different computation than the file
+describes, which rule one forbids.
+
+**Decided.** No loader patch: this file needs a converter that exports it as the Clover variant llama.cpp
+supports, or a llama.cpp that implements the four extra tensors. The local fallback patch was reverted.
+
 ## N-019: On the CPU, an 8-bit file's own numbers depend on how many words are computed at once (2026-11-10)
 
 **What was asked.** After 0.1.3's checks, three replies still differed between `kera serve` as it ships (guessing
