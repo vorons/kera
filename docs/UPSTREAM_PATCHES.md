@@ -9,8 +9,8 @@ so updates stay easy (P2).
 - **Where:** `third_party/llama.cpp`, added with `git subtree add --squash`
   (only the code, not its history; never a GitHub fork, P8 item 3).
 - **Upstream:** https://github.com/ggml-org/llama.cpp (MIT licence)
-- **Pinned:** release tag `b11619`, commit
-  `9cf967a04d0dd39f648764d73ac07facc7b75db1` (14 Oct 2026).
+- **Pinned:** release tag `b12500`, commit
+  `aaa807c568f2ffdb50d51455658ee91f5cbeedc1` (18 Nov 2026).
 - **Kera's hooks inside it:** seven (1-4 and 6-8; hook 5 was removed with Kera's lossy modes, D-034), plus small fixes,
   each change marked `[Kera]` in the code.
 
@@ -22,13 +22,13 @@ server behaves exactly as upstream.
 
 | File | Change |
 | --- | --- |
-| `common/prompt-store.h`, `common/prompt-store.cpp` (new) | The `common_prompt_store` interface (`save`, `load`, and since 9 Nov `set_identity`) and `common_set_prompt_store()`. They live in the shared `common` library so the program and the server library (a DLL on Windows) use the same pointer. |
+| `common/prompt-store.h`, `common/prompt-store.cpp` (new) | The `common_prompt_store` interface (`save`, `load`, and since 9 Nov `set_identity`) and `common_set_prompt_store()`. They live in the shared `common` library so the program and the server library (a DLL on Windows) use the same pointer. At the b12500 update, `common_saved_prompt` took upstream's `common_state_data` and `std::list<std::shared_ptr<const common_prompt_checkpoint>>` types, since b12500 changed `server_prompt::checkpoints` the same way. Kera's disk adapter in `app/serve.cpp` converts at that boundary. |
 | `common/CMakeLists.txt` | Adds the two files to `llama-common`. |
 | `tools/server/server-task.h` | Includes `prompt-store.h`. |
-| `tools/server/server-task.cpp` | `server_prompt_cache::load()`: when nothing in RAM matches, ask the store for the saved prompt sharing the longest start, and restore it the way a RAM entry is restored. |
+| `tools/server/server-slot-sched.cpp` | `server_prompt_cache::load()`: when nothing in RAM matches, ask the store for the saved prompt sharing the longest start, and restore it the way a RAM entry is restored. Upstream moved `server_prompt_cache` here from `server-task.cpp` in b12500; the hook moved with it. |
 | `tools/server/server-context.cpp` | `prompt_save()` hands a copy of each state put in the RAM cache to the store; a new `prompt_store_save()` saves the chat's state when a reply has finished, so it survives a restart. Prompts with images aren't saved. Since N-005: `release()` only marks the chat (`kera_store_pending`) and the save runs once the server is idle (`on_idle` below), or before the slot moves to another chat or is cleared; the store gets a chat's newest 2 checkpoints only (`kera_newest_checkpoints`; a hybrid model's checkpoint holds its whole recurrent state, and the server keeps up to 32). Since 9 Nov (D-033): `kera_store_identity()`, called once the model and context are loaded, tells the store what besides the model file decides a saved state's numbers: the settings as parsed (rope, YaRN, cache types, flash attention, kv overrides, adapter and control-vector scales, the guessers, and whether a LongRoPE model's context per chat is over its original one, which picks its long rope factors) and the files they name; `kera_store_check_lora()` turns the store off for the run when a request or `POST /lora-adapters` changes the adapter scales the server started with (states computed with others would otherwise be saved under its identity). |
 | `tools/server/server-queue.h`, `tools/server/server-queue.cpp` | `on_idle()`: work run on the server thread once no task has come for 250 ms, and once more before the loop ends. The save above uses it, so a chat's next message never waits for it (N-005). |
-| `src/llama-context.cpp` | `llama_io_write_host` and `llama_io_read_host` (saving and loading a sequence's state) copied each piece of a tensor with its own `ggml_backend_tensor_get`/`set`: thousands of waits on a graphics chip, as a chat's cells (or a transposed V's rows) come in small pieces. `llama_io_pieces_transfer()` copies the span a tensor's pieces cover once and cuts them out on the host, but only for many small pieces packed close together (8 or more, under 256 KiB each on average, spanning at most twice their bytes plus 1 MiB; host tensors as before). The first version also batched a recurrent state's few big rows, which sit far apart in its rollback planes, and made every guess step 140 ms slower on the Minisforum. `KERA_IO_TRACE=1` logs how the pieces fall; `KERA_IO_SPAN_TEST=1` batches everything, for the CPU tests. Worth offering upstream: the code had a TODO for it. |
+| `src/llama-context.cpp` | Kera used to batch the pieces of a saved sequence state with its own `llama_io_pieces_transfer()` (one span copy per tensor group, with heuristics to avoid far-apart rows). Upstream b12500 added `ggml_backend_tensor_get_n()`/`set_n()` instead: a native batched gather/scatter on CUDA, Metal, Vulkan and others, with a grouped and 2D-strided fallback elsewhere. Kera's copy was dropped at the update; the two `llama_io_*_host` classes now call upstream's API. |
 
 Since 0.1.1 (the bug sweep, N-014): `prompt_clear(save_pending)` drops a waiting save instead of saving it where
 the slot is cleared because its memory no longer matches its tokens (a decode error, a failed slot restore) or on
@@ -73,7 +73,7 @@ the hook declining a model), loading and running are exactly upstream's.
 | --- | --- |
 | `include/llama-stream.h` (new) | The `llama_stream_hook` struct (`begin`, `mode`, `mapped`, `end`, `cb_eval`) and `llama_set_stream_hook()`. For each weight the hook answers: load as usual, map without reading (`LLAMA_STREAM_MAP`), or place in the hook's own buffer type and don't read (`LLAMA_STREAM_BUFT`). `llama_stream_tensor_get()`: from the hook's `cb_eval`, reads a tensor on the queue of the backend that computed it, not on the separate queue `ggml_backend_tensor_get` uses (`docs/NEGATIVE_RESULTS.md` N-012). |
 | `src/llama-stream.cpp`, `src/llama-stream-impl.h` (new) | The global hook, and the chained eval callback that calls the hook's callback before the context's own (each only for the tensors it asked for). The chain keeps the context's scheduler, which `llama_stream_tensor_get()` asks for the tensor's backend. |
-| `src/CMakeLists.txt` | Adds `llama-stream.cpp`. |
+| `src/CMakeLists.txt` | Adds `llama-stream.cpp`. At b12500, `ggml_backend_buffer_i` gained `set_tensor_n`, `get_tensor_n` and `cpy_tensor_n`; Kera's stream buffer type in `src/stream/session.cpp` sets them to `nullptr` (its own per-piece access stays correct). |
 | `src/llama.cpp` | `llama_model_load()` asks the hook's `begin` (with the model path, and whether this is the memory-fit pass), gives the loader the hook, and calls `end` with the loaded model (or NULL). A model that streams anything keeps a copy of the hook. |
 | `src/llama-model-loader.h/.cpp` | Records each file's path. `create_tensor()` asks the hook for each weight: MAP weights become lazy weights (mapped, never read at load, never prefetched or locked); BUFT weights go to the hook's buffer type. `init_mappings()` leaves the BUFT weights' data out of the mapping's prefetch. `load_all_data()` skips BUFT weights and tells the hook where each MAP weight was mapped. `lazy_read::add()` takes a `force` flag for the hook's weights. |
 | `src/llama-model.h` | `llama_model::stream_hook`, and `stream_buft`, the buffer type its streamed weights are in (the loader's `streamed_buft`). |
@@ -171,13 +171,13 @@ images whichever source named its reader (as `--mmproj` did before). Tested by `
 
 ### Fixes outside the hooks
 
-- **A guessed word's probabilities (9 Nov, D-033; upstream #27196, merged 20 Oct 2026, after b11619).** With guessing
+- **A guessed word's probabilities (9 Nov, D-033; upstream #27196, merged 20 Oct 2026, after b11619; port dropped at the b12500 update).** With guessing
   ahead, `tools/server/server-context.cpp` sent every accepted guessed word with probability 1 and no alternatives
   (`// TODO: set result.probs`), so a request asking for `n_probs`/`logprobs` got fake numbers whenever Kera guessed
   (on by default; stock llama.cpp guesses only when asked). Ported upstream's fix: the draft's batch indices are kept
   (`spec_i_batch`) and each accepted word gets the model's own probabilities from them, as without guessing. Kera adds
   one line upstream doesn't have: a request for post-sampling probabilities (`post_sampling_probs`), which a guessed
-  word can't carry, doesn't guess (a replay in progress finishes). Drop the port at the next llama.cpp update.
+  word can't carry, doesn't guess (a replay in progress finishes). Upstream b12500 now carries both fixes, so Kera's port was dropped at the update.
 
 | File | Change |
 | --- | --- |

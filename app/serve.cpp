@@ -128,14 +128,15 @@ public:
         saved_prompt_blobs b;
         b.tokens.assign(p.tokens.begin(), p.tokens.end());
         b.meta.push_back((int64_t) p.checkpoints.size());
-        b.blobs.push_back(std::move(p.state_tgt));
-        b.blobs.push_back(std::move(p.state_dft));
-        for (auto & c : p.checkpoints) {
+        b.blobs.push_back({ p.state_tgt.begin(), p.state_tgt.end() });
+        b.blobs.push_back({ p.state_dft.begin(), p.state_dft.end() });
+        for (const auto & cp : p.checkpoints) {
+            auto c = *cp;
             b.meta.push_back(c.n_tokens);
             b.meta.push_back(c.pos_min);
             b.meta.push_back(c.pos_max);
-            b.blobs.push_back(std::move(c.data_tgt));
-            b.blobs.push_back(std::move(c.data_dft));
+            b.blobs.push_back({ c.data_tgt.begin(), c.data_tgt.end() });
+            b.blobs.push_back({ c.data_dft.begin(), c.data_dft.end() });
             b.blobs.push_back(std::move(c.data_spec));
         }
         std::shared_ptr<prompt_disk_store> disk;
@@ -171,8 +172,8 @@ public:
             return false;
         }
         out.tokens.assign(b.tokens.begin(), b.tokens.end());
-        out.state_tgt = std::move(b.blobs[0]);
-        out.state_dft = std::move(b.blobs[1]);
+        out.state_tgt = common_state_data(b.blobs[0].begin(), b.blobs[0].end());
+        out.state_dft = common_state_data(b.blobs[1].begin(), b.blobs[1].end());
         out.checkpoints.clear();
         for (int64_t i = 0; i < n; ++i) {
             common_prompt_checkpoint c;
@@ -180,10 +181,10 @@ public:
             c.pos_min = (llama_pos) b.meta[(size_t) (2 + 3 * i)];
             c.pos_max = (llama_pos) b.meta[(size_t) (3 + 3 * i)];
             c.id_task = -1; // restored from disk: the server falls back to re-reading if it can't load it
-            c.data_tgt = std::move(b.blobs[(size_t) (2 + 3 * i)]);
-            c.data_dft = std::move(b.blobs[(size_t) (3 + 3 * i)]);
+            c.data_tgt = common_state_data(b.blobs[(size_t) (2 + 3 * i)].begin(), b.blobs[(size_t) (2 + 3 * i)].end());
+            c.data_dft = common_state_data(b.blobs[(size_t) (3 + 3 * i)].begin(), b.blobs[(size_t) (3 + 3 * i)].end());
             c.data_spec = std::move(b.blobs[(size_t) (4 + 3 * i)]);
-            out.checkpoints.push_back(std::move(c));
+            out.checkpoints.push_back(std::make_shared<common_prompt_checkpoint>(std::move(c)));
         }
         std::fprintf(stderr, "Kera: reused %zu tokens of a saved chat from the SSD\n", lcp);
         return true;

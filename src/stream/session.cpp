@@ -571,6 +571,9 @@ struct session::impl {
             /*.cpy_tensor    =*/ [](ggml_backend_buffer_t, const ggml_tensor *, ggml_tensor *) { return false; },
             /*.clear         =*/ [](ggml_backend_buffer_t, uint8_t) {},
             /*.reset         =*/ nullptr,
+            /*.set_tensor_n  =*/ nullptr,
+            /*.get_tensor_n  =*/ nullptr,
+            /*.cpy_tensor_n  =*/ nullptr,
         };
         // the buffer's size is the RAM budget: what the experts can take, not their size on disk
         ggml_backend_buffer_t b = ggml_backend_buffer_init(buft, iface, s, std::max<uint64_t>(1, s->cfg.budget_bytes));

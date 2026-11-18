@@ -12,7 +12,7 @@ from its makers' published settings and hasn't been run by Kera's authors.
 
 ## Chat (`kera serve`, `kera cli`, the app)
 
-**Runs:** any chat model in GGUF form that llama.cpp (build b11619) runs, with the model's own chat template; models
+**Runs:** any chat model in GGUF form that llama.cpp (build b12500) runs, with the model's own chat template; models
 from Ollama's store with their Modelfile; models that see images, with their image reader (mmproj) found by itself;
 MoE models larger than memory, with their experts streamed from the SSD.
 

@@ -46,6 +46,12 @@ The first row needed a clean build: this machine's earlier build had CPU kernels
 another processor, which alone made Kera and stock differ by rounding from the first word (N-018). Downloads aren't
 affected.
 
+The rows above about `KERA_IO_SPAN_TEST=1` and `llama_io_pieces_transfer` describe the build before the
+llama.cpp b12500 update (18 Nov 2026). The flag and Kera's span copy are gone: b12500 has its own batched
+`ggml_backend_tensor_get_n()`/`set_n()`, which Kera now uses. That path still needs the same exactness check
+on a graphics chip before it can be called verified there; on this CPU, unit tests 20/20 and the reference
+checks (17 passed, 1 skipped) pass with it.
+
 ## Kera against other engines
 
 The owner asked whether a model run through Ollama gives better or more accurate answers than through Kera

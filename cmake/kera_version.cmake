@@ -18,6 +18,6 @@ elseif (GIT_FOUND)
 endif()
 
 # The pinned llama.cpp release, from docs/UPSTREAM_PATCHES.md
-set(KERA_LLAMA_CPP_TAG "b11619")
+set(KERA_LLAMA_CPP_TAG "b12500")
 
 configure_file(${CMAKE_SOURCE_DIR}/cmake/kera_version.h.in ${CMAKE_BINARY_DIR}/generated/kera_version.h @ONLY)

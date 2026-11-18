@@ -8,13 +8,14 @@
 #include "common.h"
 
 #include <list>
+#include <memory>
 #include <vector>
 
 struct common_saved_prompt {
     std::vector<llama_token>             tokens;      // text-only prompts; prompts with images aren't saved
-    std::list<common_prompt_checkpoint>  checkpoints; // what hybrid and sliding-window models need to go back
-    std::vector<uint8_t>                 state_tgt;   // llama_state_seq_get_data_ext(..., LLAMA_STATE_SEQ_FLAGS_NONE)
-    std::vector<uint8_t>                 state_dft;   // the draft model's, if any
+    std::list<std::shared_ptr<const common_prompt_checkpoint>> checkpoints; // as in server_prompt
+    common_state_data                    state_tgt;   // llama_state_seq_get_data_ext(..., LLAMA_STATE_SEQ_FLAGS_NONE)
+    common_state_data                    state_dft;   // the draft model's, if any
 };
 
 struct common_prompt_store {
