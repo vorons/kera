@@ -34,6 +34,16 @@ and listens on this CPU. A generation request was not completed: this machine ha
 four slots of 131072 context, so the test process was killed by the OOM killer. Run it on the owner's larger
 machine with a small `-np`/`-c` before calling generation verified.
 
+**Generation checked later (18 Nov, Vulkan, `--stream kera --stream-budget-gb 3`, port 8080).** No OOM this time;
+the model loads, the server listens, and it generates at about 8 tok/s while reading ~59 MB per word from the SSD
+(90% of experts already in memory). The answer is still degenerate: with `max_tokens: 128` the API returns an
+empty `content` and `reasoning_content` made of 128 repeated `G` characters (the owner saw repeated `?`). So
+loading is fixed but the output is not. The remaining suspects are a third-party converter that did not apply
+`_LinearAttentionVReorderBase`'s V-head reordering (the leftover `ssm_bd_*` tensors point to that), and the fact
+that b12500 implements only AR mode while the model's native decoding is block diffusion / self-speculative
+(PR #31306 says the self-speculative part is in a separate PR). Re-convert the original HF checkpoint with
+`third_party/llama.cpp/convert_hf_to_gguf.py` on a machine with enough RAM, then test again.
+
 ## N-019: On the CPU, an 8-bit file's own numbers depend on how many words are computed at once (2026-11-10)
 
 **What was asked.** After 0.1.3's checks, three replies still differed between `kera serve` as it ships (guessing
