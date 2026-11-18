@@ -13,9 +13,10 @@ Kera is a local AI engine and downloadable app built on llama.cpp. The full plan
 4. Check `free -h` before any model test: this machine has 15 GB of RAM and an OOM killer, so do not start a
    model without enough free memory. The owner runs the Clover-35B-A3B-Preview GGUF with expert streaming on
    and on Vulkan, so any check of that model must use the same launch (replace the file path with the GGUF):
-   `kera serve --stream kera --stream-budget-gb 3000 --port 8080 -m <clover-gguf>`. Do not switch streaming off
-   or use a smaller budget when judging its answers; if the local build is CPU-only, rebuild with
-   `-DGGML_VULKAN=ON` first.
+   `kera serve --stream kera --stream-budget-gb 3 --port 8080 -m <clover-gguf>`. The budget is in **gigabytes**,
+   not megabytes: `3` means 3 GB, while `3000` means 3 TB and effectively removes the cache's pinning limits,
+   which caused OOM here. Do not switch streaming off when judging the model's answers; if the local build is
+   CPU-only, rebuild with `-DGGML_VULKAN=ON` first.
 
 ## The owner's rules (details in `docs/DECISIONS.md`, D-001 to D-010, D-033, D-034 and D-038)
 
