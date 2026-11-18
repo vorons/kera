@@ -34,7 +34,7 @@ and listens on this CPU. A generation request was not completed: this machine ha
 four slots of 131072 context, so the test process was killed by the OOM killer. Run it on the owner's larger
 machine with a small `-np`/`-c` before calling generation verified.
 
-**Generation checked later (18 Nov, Vulkan, `--stream kera --stream-budget-gb 3`, port 8080).** No OOM this time;
+**Generation checked later (18 Nov, Vulkan, `--stream kera --stream-budget-gb 3`, port 8080), with the old GGUF.** No OOM this time;
 the model loads, the server listens, and it generates at about 8 tok/s while reading ~59 MB per word from the SSD
 (90% of experts already in memory). The answer is still degenerate: with `max_tokens: 128` the API returns an
 empty `content` and `reasoning_content` made of 128 repeated `G` characters (the owner saw repeated `?`). So
@@ -43,6 +43,14 @@ loading is fixed but the output is not. The remaining suspects are a third-party
 that b12500 implements only AR mode while the model's native decoding is block diffusion / self-speculative
 (PR #31306 says the self-speculative part is in a separate PR). Re-convert the original HF checkpoint with
 `third_party/llama.cpp/convert_hf_to_gguf.py` on a machine with enough RAM, then test again.
+
+**Resolved with a new GGUF the same day.** The owner downloaded `Diffuspace_Clover-35B-A3B-Preview-Q4_0.gguf`:
+733 tensors, `clover_moe.expert_shared_count` present, none of the four extra tensors. It is the output of
+llama.cpp's own converter. The skip calls were made `TENSOR_NOT_REQUIRED` so both files load. With the new file,
+the same Vulkan/streaming launch gives a normal answer: `content: "hello"` and a coherent `reasoning_content`,
+20 generated tokens in 6.3 s. So the repeated `?`/`G` came from the third-party converter, and the loader
+compatibility patch only fixes loading, not the old file's weights. The remaining V-head-reorder suspicion is
+confirmed by the outcome, but was not proved by comparing tensors.
 
 ## N-019: On the CPU, an 8-bit file's own numbers depend on how many words are computed at once (2026-11-10)
 

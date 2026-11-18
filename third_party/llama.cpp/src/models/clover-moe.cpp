@@ -106,10 +106,11 @@ void llama_model_clover_moe::load_arch_tensors(llama_model_loader &) {
         if (hparams.is_recr(il)) {
             // [Kera] the converter in PR #31306 filters these out; skip them here for GGUFs that kept them
             const std::string pre = "blk." + std::to_string(il) + ".";
-            create_tensor(LLM_TN_IMPL(pre + "ssm_bd_history.weight", il),      { 32 }, TENSOR_SKIP);
-            create_tensor(LLM_TN_IMPL(pre + "ssm_bd_history.bias", il),        { 32 }, TENSOR_SKIP);
-            create_tensor(LLM_TN_IMPL(pre + "ssm_bd_logit_scale.weight", il),  { 32 }, TENSOR_SKIP);
-            create_tensor(LLM_TN_IMPL(pre + "ssm_conv1d.weight_right", il),    { 3, 8192 }, TENSOR_SKIP);
+            const int skip_flags = TENSOR_SKIP | TENSOR_NOT_REQUIRED;
+            create_tensor(LLM_TN_IMPL(pre + "ssm_bd_history.weight", il),      { 32 }, skip_flags);
+            create_tensor(LLM_TN_IMPL(pre + "ssm_bd_history.bias", il),        { 32 }, skip_flags);
+            create_tensor(LLM_TN_IMPL(pre + "ssm_bd_logit_scale.weight", il),  { 32 }, skip_flags);
+            create_tensor(LLM_TN_IMPL(pre + "ssm_conv1d.weight_right", il),    { 3, 8192 }, skip_flags);
         }
 
         layer.ffn_gate_inp  = create_tensor(tn(LLM_TENSOR_FFN_GATE_INP,  "weight", il), { n_embd, n_expert }, 0);
