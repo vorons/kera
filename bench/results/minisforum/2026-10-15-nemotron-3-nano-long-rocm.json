@@ -1,0 +1,173 @@
+{
+ "model": "sha256-de487fada12adce0b32a2f49a452175b558afa3fda28d9182848ba14d043ffa1",
+ "date": "2026-10-15 17:53:36",
+ "about": "Lots of context on the Minisforum: Kera on ROCm (the add-on, guessing off, build 38e4543) against Ollama 0.30.9 (ROCm) and Kera preview 2 on Vulkan, from two tools/compare --long runs on the same day, model and sizes",
+ "settings": {
+  "kera": {
+   "model": "%USERPROFILE%\\.ollama\\models\\blobs\\sha256-de487fada12adce0b32a2f49a452175b558afa3fda28d9182848ba14d043ffa1",
+   "llama_server": "%USERPROFILE%\\AppData\\Local\\Kera\\compare\\llama-b11619\\llama-server.exe",
+   "kera": "%USERPROFILE%\\AppData\\Local\\Kera\\compare\\kera-next\\kera-dev-windows-x64\\kera.exe",
+   "engines": "kera",
+   "ollama": null,
+   "ollama_url": "http://127.0.0.1:11434",
+   "ngl": "99",
+   "ctx": 131072,
+   "runs": 3,
+   "max_tokens": 256,
+   "turns": 12,
+   "turn_words": 150,
+   "system_words": 300,
+   "extra": "--backend hip --no-auto-guess",
+   "port": 8571,
+   "out": "%USERPROFILE%\\AppData\\Local\\Kera\\compare\\results\\compare-hiplong.json",
+   "quick": false,
+   "long": "8000,32000,64000,100000",
+   "chars_per_token": 3.25,
+   "stall": null
+  },
+  "ollama_and_kera_vulkan": {
+   "model": "%USERPROFILE%\\.ollama\\models\\blobs\\sha256-de487fada12adce0b32a2f49a452175b558afa3fda28d9182848ba14d043ffa1",
+   "llama_server": "%USERPROFILE%\\AppData\\Local\\Kera\\compare\\llama-b11619\\llama-server.exe",
+   "kera": "%USERPROFILE%\\AppData\\Local\\Kera\\compare\\kera\\kera-v0.1.0-preview.2-windows-x64\\kera.exe",
+   "engines": "ollama,kera",
+   "ollama": "nemotron-3-nano:30b",
+   "ollama_url": "http://127.0.0.1:11500",
+   "ngl": "99",
+   "ctx": 131072,
+   "runs": 3,
+   "max_tokens": 256,
+   "turns": 12,
+   "turn_words": 150,
+   "system_words": 300,
+   "extra": "",
+   "port": 8571,
+   "out": "%USERPROFILE%\\AppData\\Local\\Kera\\compare\\results\\compare-long.json",
+   "quick": false,
+   "long": "8000,32000,64000,100000",
+   "chars_per_token": 3.25
+  }
+ },
+ "ollama": {
+  "load_seconds": 54.830705404281616,
+  "long": [
+   {
+    "size": 8000,
+    "prompt_tokens": 7695,
+    "first_word_s": 9.13843846321106,
+    "read_per_s": 874.6302996259493,
+    "words_per_s": 40.7280860881664,
+    "follow_up_s": 1.1755878925323486,
+    "follow_up_read": 7863
+   },
+   {
+    "size": 32000,
+    "prompt_tokens": 33602,
+    "first_word_s": 39.429487228393555,
+    "read_per_s": 860.6037124029484,
+    "words_per_s": 39.814549241320236,
+    "follow_up_s": 1.37040114402771,
+    "follow_up_read": 33725
+   },
+   {
+    "size": 64000,
+    "prompt_tokens": 64022,
+    "first_word_s": 91.95084524154663,
+    "read_per_s": 700.1732978673061,
+    "words_per_s": 37.80301094884948,
+    "follow_up_s": 1.9097099304199219,
+    "follow_up_read": 64290
+   },
+   {
+    "size": 100000,
+    "prompt_tokens": 95418,
+    "first_word_s": 150.03544449806213,
+    "read_per_s": 638.6374363953611,
+    "words_per_s": 35.975772565662815,
+    "follow_up_s": 2.3336753845214844,
+    "follow_up_read": 95695
+   }
+  ]
+ },
+ "kera": {
+  "load_seconds": 46.05959510803223,
+  "long": [
+   {
+    "size": 8000,
+    "prompt_tokens": 7694,
+    "first_word_s": 8.962239980697632,
+    "read_per_s": 861.2410198777203,
+    "words_per_s": 44.73655955857121,
+    "follow_up_s": 0.21133637428283691,
+    "follow_up_read": 22
+   },
+   {
+    "size": 32000,
+    "prompt_tokens": 33596,
+    "first_word_s": 39.89293622970581,
+    "read_per_s": 846.4001841341131,
+    "words_per_s": 42.93034133286145,
+    "follow_up_s": 0.2210559844970703,
+    "follow_up_read": 21
+   },
+   {
+    "size": 64000,
+    "prompt_tokens": 64016,
+    "first_word_s": 83.8689272403717,
+    "read_per_s": 766.2443600855346,
+    "words_per_s": 40.71518187044889,
+    "follow_up_s": 0.2657961845397949,
+    "follow_up_read": 21
+   },
+   {
+    "size": 100000,
+    "prompt_tokens": 95412,
+    "first_word_s": 135.60838890075684,
+    "read_per_s": 705.7910372083518,
+    "words_per_s": 39.30878163493722,
+    "follow_up_s": 0.32364940643310547,
+    "follow_up_read": 21
+   }
+  ]
+ },
+ "kera_vulkan": {
+  "load_seconds": 38.41095495223999,
+  "long": [
+   {
+    "size": 8000,
+    "prompt_tokens": 7694,
+    "first_word_s": 6.633026838302612,
+    "read_per_s": 1164.9013732482383,
+    "words_per_s": 58.499213013528454,
+    "follow_up_s": 0.27435731887817383,
+    "follow_up_read": 22
+   },
+   {
+    "size": 32000,
+    "prompt_tokens": 33596,
+    "first_word_s": 50.378211975097656,
+    "read_per_s": 670.7613268839406,
+    "words_per_s": 53.15957281700519,
+    "follow_up_s": 0.3245205879211426,
+    "follow_up_read": 21
+   },
+   {
+    "size": 64000,
+    "prompt_tokens": 64016,
+    "first_word_s": 147.39413857460022,
+    "read_per_s": 435.5433589142485,
+    "words_per_s": 47.34405509565385,
+    "follow_up_s": 0.46782827377319336,
+    "follow_up_read": 21
+   },
+   {
+    "size": 100000,
+    "prompt_tokens": 95412,
+    "first_word_s": 302.8402998447418,
+    "read_per_s": 315.6359357487344,
+    "words_per_s": 42.44216696301723,
+    "follow_up_s": 0.5190248489379883,
+    "follow_up_read": 21
+   }
+  ]
+ }
+}

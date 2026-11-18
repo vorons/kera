@@ -1,0 +1,10 @@
+# Kera fine-tuning with Hugging Face PEFT (tools/finetune/kera_finetune.py). Install torch for your machine first:
+#   NVIDIA or CPU: https://pytorch.org/get-started/locally/ ; AMD on Windows: AMD's PyTorch for ROCm wheels
+# then: pip install -r tools/finetune/requirements.txt
+# On a Mac with Apple silicon, pip install mlx-lm instead (the script uses it when it's installed).
+transformers==5.19.0
+peft==0.21.2
+safetensors==0.8.0
+sentencepiece==0.2.2
+protobuf==4.25.9
+numpy==2.5.4

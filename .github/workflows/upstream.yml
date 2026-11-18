@@ -1,0 +1,61 @@
+# Monthly: pull the latest llama.cpp release into the branch upstream-llama-cpp with
+# `git subtree merge --squash` (spec P2, P8), build it and run the tests. No pull request (D-006): a
+# session merges the branch once its checks pass. Pushes made with the workflow token don't start other
+# workflows, so this job runs the tests itself.
+name: upstream
+
+on:
+  schedule:
+    - cron: '17 4 3 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Find the latest llama.cpp release
+        id: tag
+        run: |
+          tag=$(git ls-remote --tags --refs https://github.com/ggml-org/llama.cpp 'b[0-9]*' | sed 's#.*refs/tags/##' | sort -V | tail -1)
+          pinned=$(grep -o 'release tag `b[0-9]*`' docs/UPSTREAM_PATCHES.md | grep -o 'b[0-9]*')
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "pinned=$pinned" >> "$GITHUB_OUTPUT"
+          echo "latest $tag, pinned $pinned"
+
+      - name: Merge it as a squashed subtree
+        if: steps.tag.outputs.tag != steps.tag.outputs.pinned
+        env:
+          TAG: ${{ steps.tag.outputs.tag }}
+          PINNED: ${{ steps.tag.outputs.pinned }}
+        run: |
+          git config user.name "kera-upstream-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B upstream-llama-cpp
+          git fetch --depth=1 --no-tags https://github.com/ggml-org/llama.cpp "refs/tags/$TAG"
+          git subtree merge --prefix=third_party/llama.cpp FETCH_HEAD --squash -m "Update llama.cpp to $TAG"
+          commit=$(git rev-parse FETCH_HEAD)
+          sed -i "s/release tag \`$PINNED\`, commit/release tag \`$TAG\`, commit/; s/\`[0-9a-f]\{40\}\` ([0-9]* [A-Za-z]* [0-9]*)\./\`$commit\`./" docs/UPSTREAM_PATCHES.md
+          sed -i "s/KERA_LLAMA_CPP_TAG \"$PINNED\"/KERA_LLAMA_CPP_TAG \"$TAG\"/" cmake/kera_version.cmake
+          git commit -am "Pin llama.cpp $TAG in the docs and version string"
+
+      - name: Build and test
+        if: steps.tag.outputs.tag != steps.tag.outputs.pinned
+        run: |
+          sudo apt-get update && sudo apt-get install -y ninja-build
+          python3 -m pip install --user numpy pytest
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DGGML_NATIVE=OFF -DLLAMA_OPENSSL=OFF -DKERA_WARNINGS_AS_ERRORS=ON
+          cmake --build build -j $(nproc)
+          ctest --test-dir build --output-on-failure
+          python3 -m pytest -q tests/python
+
+      - name: Push the branch
+        if: steps.tag.outputs.tag != steps.tag.outputs.pinned
+        run: git push --force-with-lease origin upstream-llama-cpp

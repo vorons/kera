@@ -1,0 +1,53 @@
+{
+  "what": "The image and music engines built with ggml's tiled CPU matrix multiply (GGML_LLAMAFILE=ON, llamafile's sgemm), as the chat engine is (D-030)",
+  "machine": "Cloud test VM: 4 cores (Xeon, AVX-512 with FP16 and AMX), 15.7 GB RAM; native builds; files in the OS cache (warm)",
+  "date": "2026-11-08",
+  "picture": {
+    "model": "SD-Turbo, sd_turbo-f16-q8_0.gguf, 512x512, 1 step, no guidance, seed 42, --rng cpu",
+    "before_s": { "total": 38.5, "prompt": 0.54, "sampling": 7.20, "vae_decode": 29.78 },
+    "after_s": { "total": 20.8, "prompt": 0.63, "sampling": 4.45, "vae_decode": 14.72 },
+    "cold_start_before_s": { "total": 97.6, "reading_the_file": 59.4, "note": "the VM's disk read the 1.9 GB file at about 30 MB/s; not repeated after" },
+    "speedup_total": 1.85,
+    "speedup_vae_decode": 2.02
+  },
+  "picture_quality": {
+    "how": "the same six prompts, seed 11 and starting noise as bench/results/cloud/2026-11-07-images-kera-vs-diffusers.json, against Hugging Face diffusers in float32 (the reference)",
+    "full_precision_file_sd_turbo_f16": {
+      "psnr_db_vs_reference_before": [48.64, 44.42, 44.81, 47.45, 46.11, 48.75],
+      "psnr_db_vs_reference_after": [48.77, 44.39, 45.81, 47.68, 46.09, 48.78],
+      "mean_before": 46.70,
+      "mean_after": 46.92,
+      "psnr_db_before_vs_after_mean": 55.99
+    },
+    "8_bit_file_sd_turbo_f16_q8_0": {
+      "psnr_db_vs_reference_before": [27.99, 27.64, 27.98, 27.08, 27.11, 25.71],
+      "psnr_db_vs_reference_after": [28.06, 27.32, 27.81, 27.25, 27.11, 25.69],
+      "mean_before": 27.25,
+      "mean_after": 27.21,
+      "psnr_db_before_vs_after_mean": 39.87,
+      "note": "the 8-bit file's own rounding sets how close it gets to the reference; the new build is as close as the old"
+    },
+    "verdict": "as close to the reference as before (closer with the full-precision file): the same quality"
+  },
+  "music": {
+    "model": "ACE-Step 1.5 smallest set (5Hz LM 0.6B Q8_0, v1.5 turbo Q4_K_M, VAE BF16), 10 s instrumental, ACESTEP_THREADS=4",
+    "whole_song_before_s": 57.8,
+    "whole_song_after_s": 35.7,
+    "sound_step_on_the_same_codes": {
+      "dit_before_ms": 6687.0,
+      "dit_after_ms": 6343.2,
+      "vae_decode_before_ms": 15955.9,
+      "vae_decode_after_ms": 9032.0
+    },
+    "sound_quality": {
+      "how": "ace-synth old and new on the same request0.json (the same codes and seed); log-spectrum (64 bands) distance, and the old build's own song with seed 8 for scale",
+      "log_spectrum_distance_db_old_vs_new": 2.12,
+      "log_spectrum_distance_db_old_vs_other_seed": 21.50,
+      "loudness_dbfs": { "old": -16.11, "new": -16.03 },
+      "waveform_snr_db_old_vs_new": 18.0,
+      "old_build_twice": "identical (the sound step repeats exactly)",
+      "verdict": "the same song with a small difference, ten times smaller than another seed's; no reference code was run for music"
+    },
+    "bug_found": "the language-model step's seed (lm_seed) was random on every run even with --seed: the same --seed gave a different song; kera music now sets both"
+  }
+}

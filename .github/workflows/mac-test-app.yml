@@ -1,0 +1,63 @@
+# The "Kera vs Ollama" Mac app (tools/compare/mac-app): one button that races Kera against Ollama on the owner's
+# MacBook, live (asked for by the owner, 29 Oct; D-025). Mac minutes cost about ten times Linux ones, so it runs only
+# when started by hand or for a commit marked [macapp] (D-011).
+name: mac-test-app
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['**']
+
+permissions:
+  contents: read
+
+jobs:
+  app:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[macapp]')
+    runs-on: macos-15
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v6
+
+      # the Swift app first, with a stand-in for kera, so a mistake in it fails in a minute
+      - name: Build the app (check)
+        run: KERA=/usr/bin/true OUT="$RUNNER_TEMP/check" tools/compare/mac-app/build.sh
+
+      - name: Install Ninja
+        run: brew install ninja
+
+      - name: ccache
+        uses: ggml-org/ccache-action@v1.2.24
+        with:
+          key: kera-macos-metal
+          evict-old-files: 1d
+
+      - name: Build kera
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_SHARED_LIBS=OFF -DGGML_NATIVE=OFF -DLLAMA_OPENSSL=OFF \
+            -DCMAKE_OSX_DEPLOYMENT_TARGET=13.3 -DKERA_WARNINGS_AS_ERRORS=ON -DKERA_IMAGE=OFF -DKERA_MUSIC=OFF -DKERA_3D=OFF -DKERA_SFX=OFF
+          cmake --build build -j $(sysctl -n hw.logicalcpu) --target kera
+
+      - name: Package
+        run: |
+          out="$RUNNER_TEMP/Kera vs Ollama"
+          KERA=build/bin/kera OUT="$out" VERSION="dev-${GITHUB_SHA::7}" tools/compare/mac-app/build.sh
+          "$out/Kera vs Ollama.app/Contents/Resources/kera" --version
+          cp tools/compare/mac-app/README.txt "$out/"
+          (cd "$RUNNER_TEMP" && ditto -c -k --keepParent "Kera vs Ollama" "$GITHUB_WORKSPACE/kera-vs-ollama-mac.zip")
+          # the disk image to hand to someone: the app, a link to Applications to drag it onto, and the read-me
+          dmg="$RUNNER_TEMP/dmg"
+          mkdir -p "$dmg"
+          cp -R "$out/Kera vs Ollama.app" "$dmg/"
+          ln -s /Applications "$dmg/Applications"
+          cp tools/compare/mac-app/README.txt "$dmg/Read me first.txt"
+          hdiutil create -volname "Kera vs Ollama" -srcfolder "$dmg" -ov -format UDZO "$GITHUB_WORKSPACE/Kera-vs-Ollama.dmg"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: kera-vs-ollama-mac
+          path: |
+            kera-vs-ollama-mac.zip
+            Kera-vs-Ollama.dmg
+          retention-days: 14

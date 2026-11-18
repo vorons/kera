@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kera</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <header class="top">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="kera-logo-on-dark.svg">
+      <img class="logo" src="kera-logo-on-light.svg" alt="Kera" width="132" height="40">
+    </picture>
+  </header>
+
+  <main>
+    <section class="card" aria-labelledby="machine-title">
+      <h1 id="machine-title">Your computer</h1>
+
+      <div id="setup-progress" class="progress" hidden>
+        <p id="setup-step" class="step">Getting ready…</p>
+        <div class="bar" role="progressbar" aria-labelledby="setup-step" aria-valuemin="0" aria-valuemax="100">
+          <div id="setup-bar" class="fill"></div>
+        </div>
+        <p class="hint">Kera is measuring this computer by itself. It takes about a minute, and you don't need to do anything.</p>
+      </div>
+
+      <div id="machine" hidden>
+        <ul id="machine-lines" class="lines"></ul>
+        <dl id="machine-numbers" class="numbers"></dl>
+        <p id="measured-at" class="small"></p>
+      </div>
+
+      <p id="error" class="error" role="alert" hidden></p>
+
+      <button id="recheck" type="button" hidden>Re-check this machine</button>
+    </section>
+
+    <section class="card" id="run" aria-labelledby="run-title" hidden>
+      <h2 id="run-title">Running now</h2>
+      <p id="run-state" class="step"></p>
+      <p id="run-where" class="hint" hidden>Chat apps connect to <code id="run-url"></code> (OpenAI-compatible; Anthropic-style apps use the same address without <code>/v1</code>). Kera keeps this model loaded, and loads it again when it starts.</p>
+      <pre id="run-error" class="error" hidden></pre>
+      <button id="run-stop" type="button" class="quiet">Stop this model</button>
+    </section>
+
+    <section class="card" aria-labelledby="models-title">
+      <h2 id="models-title">Your models</h2>
+      <p id="models-empty" class="hint" hidden>Kera didn't find any model files (.gguf) yet. It looks in its own models folder and where LM Studio, llama.cpp and Hugging Face keep them. Add another folder below.</p>
+      <ul id="models" class="models"></ul>
+      <form id="add-folder" class="add-folder">
+        <label for="folder">Look for models in another folder</label>
+        <div class="row">
+          <input id="folder" type="text" placeholder="For example D:\Models" autocomplete="off">
+          <button type="submit">Add</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <footer>
+    <p>Kera runs only on this computer. It doesn't send anything anywhere.</p>
+    <p id="version" class="small"></p>
+    <p><button id="quit" type="button" class="quiet">Quit Kera</button></p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

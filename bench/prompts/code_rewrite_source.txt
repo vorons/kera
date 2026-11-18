@@ -1,0 +1,105 @@
+#include "kvstore/kr_reuse.h"
+
+#include <algorithm>
+#include <cmath>
+#include <unordered_map>
+
+namespace kera {
+
+namespace {
+
+constexpr int      kAnchor  = 16;                    // tokens hashed to find where a passage may repeat
+constexpr int      kCands   = 4;                     // places remembered per hash (the latest ones)
+constexpr uint64_t kBase    = 0x100000001b3ULL;
+
+uint64_t pow_base(int k) {
+    uint64_t p = 1;
+    for (int i = 0; i < k; ++i) {
+        p *= kBase;
+    }
+    return p;
+}
+
+} // namespace
+
+std::vector<reuse_copy> plan_reuse(const int32_t * cached, int32_t n_cached, const int32_t * prompt, int32_t n_prompt,
+                                   const reuse_options & o) {
+    std::vector<reuse_copy> out;
+    const int min_len = std::max(o.min_tokens, kAnchor);
+    if (n_cached < min_len || n_prompt - n_cached < min_len + 1) {
+        return out;
+    }
+
+    // where each run of kAnchor tokens starts in memory (rolling hash; collisions are checked token by token)
+    const uint64_t top = pow_base(kAnchor - 1);
+    std::unordered_map<uint64_t, std::vector<int32_t>> starts;
+    starts.reserve((size_t) n_cached);
+    uint64_t h = 0;
+    for (int32_t i = 0; i < n_cached; ++i) {
+        if (i >= kAnchor) {
+            h -= (uint64_t) (uint32_t) cached[i - kAnchor] * top;
+        }
+        h = h * kBase + (uint64_t) (uint32_t) cached[i];
+        if (i >= kAnchor - 1) {
+            auto & v = starts[h];
+            if ((int) v.size() == kCands) {
+                v.erase(v.begin());
+            }
+            v.push_back(i - kAnchor + 1);
+        }
+    }
+
+    auto hash_at = [&](int32_t j) {
+        uint64_t x = 0;
+        for (int k = 0; k < kAnchor; ++k) {
+            x = x * kBase + (uint64_t) (uint32_t) prompt[j + k];
+        }
+        return x;
+    };
+
+    // the prompt's last token is always read (it gives the next word)
+    const int32_t end = n_prompt - 1;
+    int32_t j = n_cached;
+    uint64_t hj = 0;
+    bool have_hash = false;
+    while (j + min_len <= end) {
+        if (!have_hash) {
+            hj = hash_at(j);
+            have_hash = true;
+        }
+        int32_t best_len = 0;
+        int32_t best_src = -1;
+        const auto it = starts.find(hj);
+        if (it != starts.end()) {
+            for (const int32_t c : it->second) {
+                int32_t len = 0;
+                while (c + len < n_cached && j + len < end && cached[c + len] == prompt[j + len]) {
+                    ++len;
+                }
+                if (len >= kAnchor && len > best_len) {
+                    best_len = len;
+                    best_src = c;
+                }
+            }
+        }
+        if (best_len >= min_len) {
+            const int32_t reread = std::max(o.reread_min, (int32_t) std::ceil(o.reread_share * best_len));
+            if (best_len - reread >= kAnchor) {
+                out.push_back({ j + reread, best_src + reread, best_len - reread });
+            }
+            j += best_len;
+            have_hash = false;
+            continue;
+        }
+        // next position: roll the hash forward
+        if (j + kAnchor < n_prompt) {
+            hj = (hj - (uint64_t) (uint32_t) prompt[j] * top) * kBase + (uint64_t) (uint32_t) prompt[j + kAnchor];
+        } else {
+            have_hash = false;
+        }
+        ++j;
+    }
+    return out;
+}
+
+} // namespace kera

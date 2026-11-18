@@ -1,0 +1,144 @@
+# The optional ROCm (HIP) add-on for the Windows download (spec Phase 8, M1 risk test 5): llama.cpp's HIP back-end
+# for the Minisforum's graphics chip (gfx1151) as ggml-hip.dll, with the AMD runtime files it needs, in a `hip`
+# folder that Kera loads only for `--backend hip`. Built the way llama.cpp's own release builds it (AMD's
+# "TheRock" ROCm for Windows from AMD's Python package index; only the back-end, which matches the download's
+# ggml because both come from the same llama.cpp copy). Called by ci.yml ([hip] in a commit message) and
+# release.yml.
+name: build-windows-hip
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: Version name for the zip
+        type: string
+        default: dev
+
+permissions:
+  contents: read
+
+jobs:
+  windows-hip:
+    runs-on: windows-2022
+    timeout-minutes: 120
+    env:
+      ROCM_VERSION: "10.0.0"
+      GPU_TARGETS: gfx1151
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install Ninja
+        run: choco install ninja --no-progress
+
+      - name: Install ROCm (AMD's Python wheels, no admin rights needed)
+        run: |
+          $ErrorActionPreference = "Stop"
+          python -m venv C:\rocm\.venv
+          & C:\rocm\.venv\Scripts\Activate.ps1
+          python -m pip install --upgrade pip
+          # and the chip's own package: rocBLAS's and hipBLASLt's kernels for it, which "libraries" leaves out
+          python -m pip install --index-url https://stable.repo.amd.com/rocm/whl-next/ "rocm[libraries,devel]==${env:ROCM_VERSION}" `
+            "rocm-sdk-device-${env:GPU_TARGETS}==${env:ROCM_VERSION}"
+          rocm-sdk init
+          if ($LASTEXITCODE -ne 0) { throw "rocm-sdk init failed" }
+          $root = (rocm-sdk path --root).Trim()
+          $bin = (rocm-sdk path --bin).Trim()
+          Add-Content $env:GITHUB_ENV "HIP_PATH=$root"
+          Add-Content $env:GITHUB_ENV "HIP_DEVICE_LIB_PATH=$root\lib\llvm\amdgcn\bitcode"
+          Add-Content $env:GITHUB_ENV "HIP_PLATFORM=amd"
+          Add-Content $env:GITHUB_ENV "ROCM_BIN=$bin"
+          Add-Content $env:GITHUB_PATH $bin
+
+      - name: Build the HIP back-end
+        working-directory: third_party/llama.cpp
+        run: |
+          cmake -S . -B build -G "Ninja Multi-Config" `
+            -DCMAKE_PREFIX_PATH="${env:HIP_PATH}" `
+            -DGGML_BACKEND_DL=ON -DGGML_NATIVE=OFF -DGGML_CPU=OFF -DGGML_HIP=ON `
+            -DLLAMA_BUILD_TESTS=OFF -DLLAMA_BUILD_EXAMPLES=OFF -DLLAMA_BUILD_TOOLS=OFF -DLLAMA_BUILD_SERVER=OFF `
+            -DCMAKE_C_COMPILER="${env:HIP_PATH}\lib\llvm\bin\clang.exe" `
+            -DCMAKE_CXX_COMPILER="${env:HIP_PATH}\lib\llvm\bin\clang++.exe" `
+            -DCMAKE_C_FLAGS="-Wno-error=incompatible-pointer-types" `
+            -DCMAKE_HIP_COMPILER="${env:HIP_PATH}\lib\llvm\bin\clang.exe" `
+            -DHIP_PATH="${env:HIP_PATH}" `
+            -DAMDGPU_TARGETS="${env:GPU_TARGETS}"
+          cmake --build build --config Release --parallel ${env:NUMBER_OF_PROCESSORS} --target ggml-hip
+          if (-not (Test-Path build\bin\Release\ggml-hip.dll)) { Write-Error "ggml-hip.dll wasn't built"; exit 1 }
+
+      - name: Package the add-on
+        run: |
+          $ErrorActionPreference = "Stop"
+          $name = "kera-${{ inputs.version }}-windows-x64-hip-addon"
+          $hip = "$env:RUNNER_TEMP\$name\hip"
+          New-Item -ItemType Directory -Force "$hip\licenses" | Out-Null
+          Copy-Item third_party\llama.cpp\build\bin\Release\ggml-hip.dll $hip
+          # ggml-hip.dll loads amdhip64_7.dll at run time; the driver keeps an older copy in System32, so the
+          # add-on carries the matching one (Kera puts this folder on the DLL search path), with its dependencies
+          foreach ($f in @("amdhip64_7.dll", "rocm_kpack.dll", "amd_comgr.dll")) {
+            $src = Get-ChildItem -Path $env:ROCM_BIN -Filter $f | Select-Object -First 1
+            if (-not $src) { throw "no $f in $env:ROCM_BIN" }
+            Copy-Item $src.FullName $hip
+          }
+          # and every other ROCm DLL it needs (hipBLAS, rocBLAS, hipBLASLt...): llama.cpp's own release leaves those
+          # to an installed HIP SDK, which a normal PC doesn't have, so preview 2's add-on couldn't load (Windows error
+          # 126 on the Minisforum). Follow the imports until nothing more comes from ROCm's bin folder.
+          $objdump = "$env:HIP_PATH\lib\llvm\bin\llvm-objdump.exe"
+          $todo = [System.Collections.Generic.Queue[string]]::new()
+          Get-ChildItem $hip -Filter *.dll | ForEach-Object { $todo.Enqueue($_.FullName) }
+          while ($todo.Count -gt 0) {
+            $dll = $todo.Dequeue()
+            foreach ($dep in (& $objdump -p $dll | Select-String "DLL Name: (.+)$" | ForEach-Object { $_.Matches[0].Groups[1].Value.Trim() })) {
+              $src = Join-Path $env:ROCM_BIN $dep
+              if ((Test-Path $src) -and -not (Test-Path (Join-Path $hip $dep))) {
+                Copy-Item $src $hip
+                Write-Host "  needed by $(Split-Path $dll -Leaf): $dep"
+                $todo.Enqueue((Join-Path $hip $dep))
+              }
+            }
+          }
+          # rocBLAS and hipBLASLt look for their kernels in rocblas\library\<chip> and hipblaslt\library\<chip> next to
+          # their DLL, and for their own code for the chip in ..\.kpack (a folder next to "hip"). Without them rocBLAS
+          # stops Kera at its first sum (found on the Minisforum, N-007). They come from the chip's device package.
+          $dev = Join-Path (Split-Path $env:HIP_PATH) "_rocm_sdk_libraries"
+          foreach ($lib in @("rocblas", "hipblaslt")) {
+            $src = "$dev\bin\$lib\library\$env:GPU_TARGETS"
+            if (-not (Test-Path $src)) { throw "no $lib kernels for $env:GPU_TARGETS in $src" }
+            New-Item -ItemType Directory -Force "$hip\$lib\library" | Out-Null
+            Copy-Item -Recurse $src "$hip\$lib\library\"
+            Write-Host "  $lib kernels: $((Get-ChildItem -Recurse -File "$hip\$lib\library").Count) files"
+          }
+          $kpack = "$env:RUNNER_TEMP\$name\.kpack"
+          New-Item -ItemType Directory -Force $kpack | Out-Null
+          Copy-Item "$dev\.kpack\blas_lib_$env:GPU_TARGETS.kpack" $kpack
+          # the licences that come with AMD's ROCm packages
+          Get-ChildItem -Path $env:HIP_PATH -Recurse -Include "LICENSE*", "NOTICE*", "COPYING*" -ErrorAction SilentlyContinue |
+            Select-Object -First 40 | ForEach-Object {
+              $rel = $_.FullName.Substring($env:HIP_PATH.Length).TrimStart('\').Replace('\', '_')
+              Copy-Item $_.FullName "$hip\licenses\$rel"
+            }
+          Copy-Item packaging\windows\HIP-README.txt "$hip\README.txt"
+          Copy-Item third_party\llama.cpp\LICENSE "$hip\licenses\llama.cpp-LICENSE"
+          Get-ChildItem $hip | Format-Table Name, Length
+
+          # The add-on must load on a PC with nothing but Windows and AMD's driver: try it the way Kera does (this
+          # folder on the DLL search path, ggml-base from the main download). No graphics chip is needed for this.
+          Add-Type @"
+          using System; using System.Runtime.InteropServices;
+          public static class Dll {
+            [DllImport("kernel32", SetLastError = true, CharSet = CharSet.Unicode)] public static extern IntPtr LoadLibraryW(string path);
+            [DllImport("kernel32", SetLastError = true, CharSet = CharSet.Unicode)] public static extern bool SetDllDirectoryW(string dir);
+          }
+          "@
+          [void][Dll]::LoadLibraryW((Resolve-Path third_party\llama.cpp\build\bin\Release\ggml-base.dll).Path)
+          [void][Dll]::SetDllDirectoryW($hip)
+          if ([Dll]::LoadLibraryW("$hip\ggml-hip.dll") -eq [IntPtr]::Zero) {
+            throw "ggml-hip.dll doesn't load from the add-on (Windows error $([Runtime.InteropServices.Marshal]::GetLastWin32Error()))"
+          }
+          Write-Host "ggml-hip.dll loads from the add-on"
+          Compress-Archive -Path "$env:RUNNER_TEMP\$name\hip", $kpack -DestinationPath "$name.zip"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: kera-windows-x64-hip-addon
+          path: kera-${{ inputs.version }}-windows-x64-hip-addon.zip
+          retention-days: 3

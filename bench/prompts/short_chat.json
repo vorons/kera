@@ -1,0 +1,10 @@
+{
+ "id": "short_chat",
+ "title": "Short chat",
+ "messages": [
+  {
+   "role": "user",
+   "content": "What are three simple ways to keep a sourdough starter healthy? Keep it short."
+  }
+ ]
+}

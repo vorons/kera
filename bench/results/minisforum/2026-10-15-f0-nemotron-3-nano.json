@@ -1,0 +1,217 @@
+{
+ "cache_state": "warm",
+ "ceiling_tok_s": null,
+ "date": "2026-10-15T18:10:49Z",
+ "gates": {},
+ "kera": {
+  "commit": "1fc1eea629e3",
+  "llama_cpp": "b11619",
+  "version": "0.1.0"
+ },
+ "label": "stock llama.cpp settings",
+ "load_s": 25.32,
+ "machine": {
+  "chip": "AMD RYZEN AI MAX+ 395 w/ Radeon 8060S",
+  "devices": [
+   "Vulkan0: AMD Radeon(TM) 8060S Graphics",
+   "CPU: AMD RYZEN AI MAX+ 395 w/ Radeon 8060S          "
+  ],
+  "gpu": "",
+  "os": "Windows 11 (build 26100)",
+  "profile_hash": "",
+  "ram_gb": 61.647281646728516
+ },
+ "model": {
+  "architecture": "nemotron_h_moe",
+  "desc": "nemotron_h_moe 31B.A3.5B Q4_K - Medium",
+  "file": "sha256-de487fada12adce0b32a2f49a452175b558afa3fda28d9182848ba14d043ffa1",
+  "hash": "xxh128:eee65b09a5f7a7b6d1cd22d073abfcec",
+  "n_params": 31577940288,
+  "size_gb": 24.51
+ },
+ "peak_ram_gb": 22.3,
+ "results": [
+  {
+   "accept_rate": null,
+   "decode_tok_s": 58.34,
+   "expert_hit": null,
+   "k_histogram": null,
+   "kv_hit": null,
+   "n_gen": 256,
+   "n_prompt": 34,
+   "page_faults_per_tok": 386.0,
+   "prefetch_acc": null,
+   "prefill_tok_s": 291.62,
+   "prompt_id": "short_chat",
+   "rendered_with": "model template",
+   "runs": [
+    {
+     "decode_tok_s": 58.77,
+     "prefill_tok_s": 288.19,
+     "ttft_ms": 118.7
+    },
+    {
+     "decode_tok_s": 57.92,
+     "prefill_tok_s": 294.64,
+     "ttft_ms": 116.2
+    },
+    {
+     "decode_tok_s": 58.34,
+     "prefill_tok_s": 291.62,
+     "ttft_ms": 117.6
+    }
+   ],
+   "ssd_gb_per_tok": null,
+   "stream": null,
+   "ttft_ms": 117.6
+  },
+  {
+   "accept_rate": null,
+   "decode_tok_s": 57.81,
+   "expert_hit": null,
+   "k_histogram": null,
+   "kv_hit": null,
+   "n_gen": 256,
+   "n_prompt": 197,
+   "page_faults_per_tok": 386.0,
+   "prefetch_acc": null,
+   "prefill_tok_s": 850.46,
+   "prompt_id": "code",
+   "rendered_with": "model template",
+   "runs": [
+    {
+     "decode_tok_s": 58.21,
+     "prefill_tok_s": 861.69,
+     "ttft_ms": 229.3
+    },
+    {
+     "decode_tok_s": 57.81,
+     "prefill_tok_s": 850.46,
+     "ttft_ms": 233.1
+    },
+    {
+     "decode_tok_s": 57.79,
+     "prefill_tok_s": 847.39,
+     "ttft_ms": 233.7
+    }
+   ],
+   "ssd_gb_per_tok": null,
+   "stream": null,
+   "ttft_ms": 233.1
+  },
+  {
+   "accept_rate": null,
+   "decode_tok_s": 56.77,
+   "expert_hit": null,
+   "k_histogram": null,
+   "kv_hit": null,
+   "n_gen": 256,
+   "n_prompt": 4360,
+   "page_faults_per_tok": 386.0,
+   "prefetch_acc": null,
+   "prefill_tok_s": 1183.73,
+   "prompt_id": "long_context",
+   "rendered_with": "model template",
+   "runs": [
+    {
+     "decode_tok_s": 56.77,
+     "prefill_tok_s": 1193.83,
+     "ttft_ms": 3653.4
+    },
+    {
+     "decode_tok_s": 56.7,
+     "prefill_tok_s": 1183.73,
+     "ttft_ms": 3684.6
+    },
+    {
+     "decode_tok_s": 57.07,
+     "prefill_tok_s": 1174.9,
+     "ttft_ms": 3711.8
+    }
+   ],
+   "ssd_gb_per_tok": null,
+   "stream": null,
+   "ttft_ms": 3684.6
+  },
+  {
+   "accept_rate": null,
+   "decode_tok_s": 55.68,
+   "expert_hit": null,
+   "k_histogram": null,
+   "kv_hit": null,
+   "n_gen": 256,
+   "n_prompt": 433,
+   "page_faults_per_tok": 386.0,
+   "prefetch_acc": null,
+   "prefill_tok_s": 1231.01,
+   "prompt_id": "tool_call",
+   "rendered_with": "model template",
+   "runs": [
+    {
+     "decode_tok_s": 56.09,
+     "prefill_tok_s": 1231.01,
+     "ttft_ms": 353.1
+    },
+    {
+     "decode_tok_s": 39.08,
+     "prefill_tok_s": 1167.42,
+     "ttft_ms": 372.1
+    },
+    {
+     "decode_tok_s": 55.68,
+     "prefill_tok_s": 1289.2,
+     "ttft_ms": 337.3
+    }
+   ],
+   "ssd_gb_per_tok": null,
+   "stream": null,
+   "ttft_ms": 353.1
+  }
+ ],
+ "runs": 3,
+ "schema": "kera-bench-1",
+ "settings": {
+  "engine": {
+   "flash_attn": "auto",
+   "load_mode": "auto",
+   "n_batch": 2048,
+   "n_ctx": 4864,
+   "n_gpu_layers": -1,
+   "n_threads": 16,
+   "n_ubatch": 512,
+   "repack": 1,
+   "sampling": "greedy",
+   "thinking": "default",
+   "type_k": "f16",
+   "type_v": "f16"
+  },
+  "kera": {
+   "chat.model_defaults": 1.0,
+   "io.read_size_mib": 0.0,
+   "io.reader_threads": 0.0,
+   "kv.disk_budget_gb": 20.0,
+   "kv.store": 1.0,
+   "lossy.kv8": 0.0,
+   "lossy.reuse": 0.0,
+   "lossy.reuse_min_tokens": 256.0,
+   "lossy.route_margin": 0.0,
+   "setup.ram_test_mib": 1024.0,
+   "setup.ssd_cell_seconds": 0.8,
+   "setup.ssd_confirm_seconds": 3.0,
+   "setup.ssd_test_gb": 2.0,
+   "spec.auto": 1.0,
+   "spec.controller": 1.0,
+   "stream.budget_gb": 0.0,
+   "stream.io_threads": 8.0,
+   "stream.lookahead": 0.0,
+   "stream.mode": -1.0
+  },
+  "stream": {
+   "budget_gb": null,
+   "expert_gb": null,
+   "io_threads": 8,
+   "lookahead": false,
+   "mode": "off"
+  }
+ }
+}

@@ -1,0 +1,56 @@
+{
+ "id": "tool_call",
+ "title": "JSON tool call",
+ "messages": [
+  {
+   "role": "system",
+   "content": "You are a helpful assistant. Use the tools when they help, and call them with valid JSON."
+  },
+  {
+   "role": "user",
+   "content": "Is it going to rain in Lisbon tomorrow afternoon? I need the temperature in Celsius too."
+  }
+ ],
+ "tools": [
+  {
+   "name": "get_forecast",
+   "description": "Get the weather forecast for a city.",
+   "parameters": {
+    "type": "object",
+    "properties": {
+     "city": {
+      "type": "string",
+      "description": "City name, e.g. Lisbon"
+     },
+     "day": {
+      "type": "string",
+      "enum": [
+       "today",
+       "tomorrow"
+      ]
+     },
+     "part_of_day": {
+      "type": "string",
+      "enum": [
+       "morning",
+       "afternoon",
+       "evening",
+       "night"
+      ]
+     },
+     "unit": {
+      "type": "string",
+      "enum": [
+       "celsius",
+       "fahrenheit"
+      ]
+     }
+    },
+    "required": [
+     "city",
+     "day"
+    ]
+   }
+  }
+ ]
+}

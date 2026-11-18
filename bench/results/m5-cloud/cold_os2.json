@@ -1,0 +1,187 @@
+{
+ "cache_state": "cold",
+ "ceiling_tok_s": null,
+ "date": "2026-10-14T21:45:06Z",
+ "gates": {},
+ "kera": {
+  "commit": "f41ae8998970",
+  "llama_cpp": "b11619",
+  "version": "0.1.0"
+ },
+ "label": "OS cache + Kera hints (async), cold",
+ "load_s": 0.53,
+ "machine": {
+  "chip": "Intel(R) Xeon(R) Processor @ 2.80GHz",
+  "devices": [
+   "CPU: Intel(R) Xeon(R) Processor @ 2.80GHz"
+  ],
+  "gpu": "",
+  "os": "Ubuntu 24.04.5 LTS (kernel 6.18.44-fc-v114)",
+  "profile_hash": "96f776b3e724b649",
+  "ram_gb": 15.72
+ },
+ "model": {
+  "architecture": "nemotron_h_moe",
+  "desc": "nemotron_h_moe 31B.A3.5B Q4_0",
+  "file": "Nemotron-3-Nano-30B-A3B-Q4_0.gguf",
+  "hash": "xxh128:c61068fa1f9d70ab25dfa0be2ee5328c",
+  "n_params": 31577940288,
+  "size_gb": 18.21
+ },
+ "peak_ram_gb": 13.27,
+ "results": [
+  {
+   "accept_rate": null,
+   "decode_tok_s": 4.42,
+   "expert_hit": null,
+   "k_histogram": null,
+   "kv_hit": null,
+   "n_gen": 64,
+   "n_prompt": 35,
+   "page_faults_per_tok": 794.7,
+   "prefetch_acc": null,
+   "prefill_tok_s": 5.44,
+   "prompt_id": "short_chat",
+   "rendered_with": "model template",
+   "runs": [
+    {
+     "decode_tok_s": 4.42,
+     "prefill_tok_s": 5.44,
+     "ttft_ms": 6442.8
+    }
+   ],
+   "ssd_gb_per_tok": null,
+   "stream": {
+    "experts_asked": 0,
+    "gb_read": 0.0,
+    "guess_ms_per_tok": 0.0,
+    "guessed": 0,
+    "guessed_right": 0,
+    "in_memory": 0,
+    "io_wait_ms_per_tok": 0.0,
+    "mode": "os",
+    "on_their_way": 0,
+    "os_hint_gb": 49.031,
+    "read_early": 0,
+    "read_early_used": 0,
+    "read_while_waiting": 0,
+    "step_ms_per_tok": 8.12
+   },
+   "ttft_ms": 6442.8
+  },
+  {
+   "accept_rate": null,
+   "decode_tok_s": 4.08,
+   "expert_hit": null,
+   "k_histogram": null,
+   "kv_hit": null,
+   "n_gen": 64,
+   "n_prompt": 198,
+   "page_faults_per_tok": 1239.8,
+   "prefetch_acc": null,
+   "prefill_tok_s": 11.71,
+   "prompt_id": "code",
+   "rendered_with": "model template",
+   "runs": [
+    {
+     "decode_tok_s": 4.08,
+     "prefill_tok_s": 11.71,
+     "ttft_ms": 16908.9
+    }
+   ],
+   "ssd_gb_per_tok": null,
+   "stream": {
+    "experts_asked": 0,
+    "gb_read": 0.0,
+    "guess_ms_per_tok": 0.0,
+    "guessed": 0,
+    "guessed_right": 0,
+    "in_memory": 0,
+    "io_wait_ms_per_tok": 0.0,
+    "mode": "os",
+    "on_their_way": 0,
+    "os_hint_gb": 49.031,
+    "read_early": 0,
+    "read_early_used": 0,
+    "read_while_waiting": 0,
+    "step_ms_per_tok": 7.59
+   },
+   "ttft_ms": 16908.9
+  },
+  {
+   "accept_rate": null,
+   "decode_tok_s": 4.11,
+   "expert_hit": null,
+   "k_histogram": null,
+   "kv_hit": null,
+   "n_gen": 64,
+   "n_prompt": 434,
+   "page_faults_per_tok": 1043.1,
+   "prefetch_acc": null,
+   "prefill_tok_s": 14.65,
+   "prompt_id": "tool_call",
+   "rendered_with": "model template",
+   "runs": [
+    {
+     "decode_tok_s": 4.11,
+     "prefill_tok_s": 14.65,
+     "ttft_ms": 29628.6
+    }
+   ],
+   "ssd_gb_per_tok": null,
+   "stream": {
+    "experts_asked": 0,
+    "gb_read": 0.0,
+    "guess_ms_per_tok": 0.0,
+    "guessed": 0,
+    "guessed_right": 0,
+    "in_memory": 0,
+    "io_wait_ms_per_tok": 0.0,
+    "mode": "os",
+    "on_their_way": 0,
+    "os_hint_gb": 49.031,
+    "read_early": 0,
+    "read_early_used": 0,
+    "read_while_waiting": 0,
+    "step_ms_per_tok": 9.66
+   },
+   "ttft_ms": 29628.6
+  }
+ ],
+ "runs": 1,
+ "schema": "kera-bench-1",
+ "settings": {
+  "engine": {
+   "flash_attn": "auto",
+   "load_mode": "mmap",
+   "n_batch": 2048,
+   "n_ctx": 768,
+   "n_gpu_layers": -1,
+   "n_threads": 4,
+   "n_ubatch": 512,
+   "repack": 0,
+   "sampling": "greedy",
+   "thinking": "default",
+   "type_k": "f16",
+   "type_v": "f16"
+  },
+  "kera": {
+   "io.read_size_mib": 0.0,
+   "io.reader_threads": 0.0,
+   "kv.disk_budget_gb": 20.0,
+   "kv.store": 1.0,
+   "setup.ram_test_mib": 1024.0,
+   "setup.ssd_cell_seconds": 0.8,
+   "setup.ssd_confirm_seconds": 3.0,
+   "setup.ssd_test_gb": 2.0,
+   "spec.controller": 1.0
+  },
+  "stream": {
+   "budget_gb": null,
+   "expert_gb": 16.6,
+   "io_threads": 8,
+   "lookahead": false,
+   "mode": "os"
+  }
+ }
+}

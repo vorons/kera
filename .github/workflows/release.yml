@@ -1,0 +1,113 @@
+# A version (v0.N.x) makes the downloads and a GitHub Release (spec P8, Phase 13). Two ways to start one:
+#   - push a tag v0.N.x;
+#   - push a commit whose message contains "[release v0.N.x]": the release is made from that commit and
+#     the tag created with it (agent sessions can push only to their branch, not tags).
+# Pre-releases (a dash in the version, e.g. v0.1.0-preview.1) build Windows and Linux; full milestone
+# releases also build the Mac app, the optional ROCm add-on for Windows and the DGX Spark download (Linux ARM64, CUDA). The release notes are docs/releases/<version>.md, the section 9 report.
+name: release
+
+on:
+  push:
+    tags: ['v*']
+    branches: ['**']
+
+permissions:
+  contents: write
+
+jobs:
+  version:
+    # skipped (and free) for ordinary pushes
+    if: ${{ github.ref_type == 'tag' || contains(github.event.head_commit.message, '[release v') }}
+    runs-on: ubuntu-24.04
+    outputs:
+      tag: ${{ steps.v.outputs.tag }}
+    steps:
+      - id: v
+        env:
+          MSG: ${{ github.event.head_commit.message }}
+        run: |
+          if [ "$GITHUB_REF_TYPE" = tag ]; then
+            tag="$GITHUB_REF_NAME"
+          else
+            tag=$(printf '%s' "$MSG" | grep -oE '\[release v[0-9][0-9A-Za-z.-]*\]' | head -1 | sed -E 's/^\[release (v[^]]+)\]$/\1/')
+          fi
+          case "$tag" in
+            v[0-9]*) echo "tag=$tag" >> "$GITHUB_OUTPUT"; echo "Releasing $tag" ;;
+            *) echo "No version found"; exit 1 ;;
+          esac
+
+  windows:
+    needs: version
+    uses: ./.github/workflows/build-windows.yml
+    with:
+      package: true
+      version: ${{ needs.version.outputs.tag }}
+
+  linux:
+    needs: version
+    uses: ./.github/workflows/build-linux.yml
+    with:
+      version: ${{ needs.version.outputs.tag }}
+
+  macos:
+    needs: version
+    if: ${{ !contains(needs.version.outputs.tag, '-') }}
+    uses: ./.github/workflows/build-macos.yml
+    with:
+      package: true
+      version: ${{ needs.version.outputs.tag }}
+
+  # the DGX Spark download (Linux ARM64 with CUDA, D-029): full releases, and a "[release ...]" commit with [spark]
+  spark:
+    needs: version
+    if: ${{ !contains(needs.version.outputs.tag, '-') || contains(github.event.head_commit.message, '[spark]') }}
+    uses: ./.github/workflows/build-linux-arm64-cuda.yml
+    with:
+      package: true
+      version: ${{ needs.version.outputs.tag }}
+
+  # the optional ROCm (HIP) add-on: for full milestone releases, and for a "[release ...]" commit with [hip] too
+  windows-hip:
+    needs: version
+    if: ${{ !contains(needs.version.outputs.tag, '-') || contains(github.event.head_commit.message, '[hip]') }}
+    uses: ./.github/workflows/build-windows-hip.yml
+    with:
+      version: ${{ needs.version.outputs.tag }}
+
+  publish:
+    needs: [version, windows, linux, macos, windows-hip, spark]
+    if: ${{ always() && needs.version.result == 'success' && needs.windows.result == 'success' && needs.linux.result == 'success' && (needs.macos.result == 'success' || needs.macos.result == 'skipped') && (needs.windows-hip.result == 'success' || needs.windows-hip.result == 'skipped') && (needs.spark.result == 'success' || needs.spark.result == 'skipped') }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/download-artifact@v8
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.version.outputs.tag }}
+        run: |
+          notes="docs/releases/$TAG.md"
+          if [ ! -f "$notes" ]; then
+            notes="$RUNNER_TEMP/notes.md"
+            echo "Kera $TAG. See docs/STATUS.md for what changed." > "$notes"
+          fi
+          pre=""
+          case "$TAG" in *-*) pre="--prerelease" ;; esac
+          ls -la dist
+          # A pushed tag exists already; a "[release ...]" commit gets its tag made here, through the git
+          # API: asking the release API to make the tag itself was refused once ("Resource not accessible
+          # by integration", 14 Oct 2026), while this works.
+          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" > /dev/null ||
+             gh api -X POST "repos/$GITHUB_REPOSITORY/git/refs" -f ref="refs/tags/$TAG" -f sha="$GITHUB_SHA" > /dev/null; then
+            gh release create "$TAG" dist/* --title "Kera $TAG" --notes-file "$notes" --verify-tag $pre
+          else
+            # if GitHub refuses the tag too, leave a draft: the owner can download from it now, and
+            # publishing it (one click) makes the tag
+            echo "::warning::GitHub refused to make the tag $TAG; making a draft release for the owner to publish"
+            gh release create "$TAG" dist/* --title "Kera $TAG" --notes-file "$notes" --target "$GITHUB_SHA" --draft $pre
+          fi

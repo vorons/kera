@@ -1,0 +1,76 @@
+# Linux x64 download: CPU back-end variants loaded at run time plus Vulkan. Called by release.yml.
+# (Everyday Linux tests run in ci.yml; the CUDA build-only check runs in nightly.yml.)
+name: build-linux
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        type: string
+        default: dev
+
+permissions:
+  contents: read
+
+jobs:
+  linux:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180   # a build with an empty compiler cache takes about 95 minutes (10 Nov: stopped at 90, 12 files short)
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build glslc libvulkan-dev spirv-headers
+
+      - name: ccache
+        uses: ggml-org/ccache-action@v1.2.24
+        with:
+          key: kera-linux-release
+          evict-old-files: 1d
+
+      - name: Build
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_SHARED_LIBS=ON -DGGML_NATIVE=OFF -DGGML_BACKEND_DL=ON -DGGML_CPU_ALL_VARIANTS=ON \
+            -DGGML_VULKAN=ON -DLLAMA_OPENSSL=OFF -DKERA_WARNINGS_AS_ERRORS=ON
+          cmake --build build -j $(nproc)
+
+      - name: Unit tests
+        run: ctest --test-dir build --output-on-failure
+
+      - name: Package
+        run: |
+          name=kera-${{ inputs.version }}-linux-x64
+          mkdir -p "$RUNNER_TEMP/$name"
+          cp build/bin/kera build/bin/*.so* "$RUNNER_TEMP/$name/"
+          # the image engine (D-027): its programs and its own copy of ggml, by the names they load
+          mkdir -p "$RUNNER_TEMP/$name/image"
+          # (-P keeps the libraries' version links as links; the CPU and Vulkan parts are loaded by name when it starts)
+          cp build/bin/image/sd-cli build/bin/image/sd-server "$RUNNER_TEMP/$name/image/"
+          cp -P build/bin/image/libstable-diffusion.so build/bin/image/libggml* "$RUNNER_TEMP/$name/image/"
+          "$RUNNER_TEMP/$name/image/sd-cli" --help > /dev/null
+          # the music engine (D-028), the same way
+          mkdir -p "$RUNNER_TEMP/$name/music"
+          cp build/bin/music/ace-lm build/bin/music/ace-synth build/bin/music/ace-server "$RUNNER_TEMP/$name/music/"
+          cp -P build/bin/music/libggml* "$RUNNER_TEMP/$name/music/"
+          "$RUNNER_TEMP/$name/music/ace-synth" --help 2>&1 | grep -q "Usage:"
+          # the 3D and sound-effect engines (D-031), the same way
+          mkdir -p "$RUNNER_TEMP/$name/3d" "$RUNNER_TEMP/$name/sfx"
+          cp build/bin/3d/trellis-cli "$RUNNER_TEMP/$name/3d/"
+          cp -P build/bin/3d/libggml* "$RUNNER_TEMP/$name/3d/"
+          "$RUNNER_TEMP/$name/3d/trellis-cli" --help 2>&1 | grep -q "usage:"
+          cp build/bin/sfx/audiocpp_cli build/bin/sfx/audiocpp_server "$RUNNER_TEMP/$name/sfx/"
+          cp -P build/bin/sfx/libggml* "$RUNNER_TEMP/$name/sfx/"
+          "$RUNNER_TEMP/$name/sfx/audiocpp_cli" --help 2>&1 | grep -q -- "--task"
+          cp packaging/linux/README.txt LICENSE NOTICE build/generated/THIRD_PARTY_LICENSES.txt "$RUNNER_TEMP/$name/"
+          python3 packaging/copy_finetune.py "$RUNNER_TEMP/$name"
+          tar -C "$RUNNER_TEMP" -czf "$name.tar.gz" "$name"
+          ls -la "$RUNNER_TEMP/$name"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: kera-linux-x64
+          path: kera-${{ inputs.version }}-linux-x64.tar.gz
+          retention-days: 3

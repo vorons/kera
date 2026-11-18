@@ -1,0 +1,639 @@
+{
+ "_about": "Makers' own step counts for the image engine's recipes (third_party/stable-diffusion.cpp/examples/server/recipes), which cap steps at 20, and the file names each recipe's model is recognised by (without the precision tag). Read from each maker's card or reference code on 2026-11-10; tools/recipes/make_table.py turns this and the recipes into app/image_recipes.inc. A recipe left out keeps the engine's defaults.",
+ "models": [
+  {
+   "recipe": "qwen-image",
+   "family": "Qwen-Image",
+   "names": [
+    "qwen-image",
+    "qwen_image"
+   ],
+   "steps": 50,
+   "source": "https://huggingface.co/Qwen/Qwen-Image",
+   "quote": "num_inference_steps=50,",
+   "confidence": "high",
+   "drop": [
+    "flow_shift"
+   ]
+  },
+  {
+   "recipe": "qwen-image-edit",
+   "family": "Qwen-Image-Edit",
+   "names": [
+    "qwen-image-edit",
+    "qwen_image_edit"
+   ],
+   "steps": 50,
+   "source": "https://huggingface.co/Qwen/Qwen-Image-Edit",
+   "quote": "\"num_inference_steps\": 50,",
+   "confidence": "high",
+   "drop": [
+    "flow_shift"
+   ],
+   "with_picture": true
+  },
+  {
+   "recipe": "qwen-image-edit-2509",
+   "family": "Qwen-Image-Edit-2509",
+   "names": [
+    "qwen-image-edit-2509",
+    "qwen_image_edit_2509"
+   ],
+   "steps": 40,
+   "source": "https://huggingface.co/Qwen/Qwen-Image-Edit-2509",
+   "quote": "\"num_inference_steps\": 40,",
+   "confidence": "high",
+   "drop": [
+    "flow_shift"
+   ],
+   "with_picture": true
+  },
+  {
+   "recipe": "qwen-image-edit-2511",
+   "family": "Qwen-Image-Edit-2511",
+   "names": [
+    "qwen-image-edit-2511",
+    "qwen_image_edit_2511"
+   ],
+   "steps": 40,
+   "source": "https://huggingface.co/Qwen/Qwen-Image-Edit-2511",
+   "quote": "\"num_inference_steps\": 40,",
+   "confidence": "high",
+   "drop": [
+    "flow_shift"
+   ],
+   "with_picture": true
+  },
+  {
+   "recipe": "qwen-image-layered",
+   "family": "Qwen-Image-Layered",
+   "names": [
+    "qwen-image-layered",
+    "qwen_image_layered"
+   ],
+   "steps": 50,
+   "source": "https://huggingface.co/Qwen/Qwen-Image-Layered",
+   "quote": "\"num_inference_steps\": 50,",
+   "confidence": "high",
+   "drop": [
+    "flow_shift"
+   ],
+   "with_picture": true
+  },
+  {
+   "recipe": "qwen-image-21",
+   "family": "Qwen-Image-2.1",
+   "names": [
+    "qwen-image-2.1",
+    "qwen_image_2.1"
+   ],
+   "steps": 40,
+   "source": "https://raw.githubusercontent.com/QwenLM/Qwen-Image-2.1/main/README.md",
+   "quote": "| `num_inference_steps` | 40 | Number of denoising steps |",
+   "confidence": "high",
+   "with_picture": true
+  },
+  {
+   "recipe": "qwen-image-21-turbo",
+   "family": "Qwen-Image-2.1-Turbo",
+   "names": [
+    "qwen-image-2.1-turbo",
+    "qwen_image_2.1_turbo"
+   ],
+   "with_picture": true
+  },
+  {
+   "recipe": "z-image",
+   "family": "Z-Image",
+   "names": [
+    "z-image",
+    "z_image",
+    "z-image-base",
+    "z_image_base"
+   ],
+   "steps": 50,
+   "source": "https://huggingface.co/Tongyi-MAI/Z-Image",
+   "quote": "num_inference_steps=50,",
+   "confidence": "high"
+  },
+  {
+   "recipe": "sd3-medium",
+   "family": "Stable Diffusion 3 Medium",
+   "names": [
+    "sd3_medium",
+    "sd3-medium",
+    "sd3_medium_incl_clips",
+    "sd3_medium_incl_clips_t5xxlfp8",
+    "sd3_medium_incl_clips_t5xxlfp16",
+    "stable-diffusion-3-medium"
+   ],
+   "steps": 28,
+   "source": "https://huggingface.co/stabilityai/stable-diffusion-3-medium-diffusers",
+   "quote": "num_inference_steps=28,",
+   "confidence": "high"
+  },
+  {
+   "recipe": "sd35-large",
+   "family": "Stable Diffusion 3.5 Large",
+   "names": [
+    "sd3.5_large",
+    "sd3.5-large",
+    "stable-diffusion-3.5-large"
+   ],
+   "steps": 28,
+   "source": "https://huggingface.co/stabilityai/stable-diffusion-3.5-large",
+   "quote": "num_inference_steps=28,",
+   "confidence": "high"
+  },
+  {
+   "recipe": "sd35-medium",
+   "family": "Stable Diffusion 3.5 Medium",
+   "names": [
+    "sd3.5_medium",
+    "sd3.5-medium",
+    "stable-diffusion-3.5-medium"
+   ],
+   "steps": 40,
+   "source": "https://huggingface.co/stabilityai/stable-diffusion-3.5-medium",
+   "quote": "num_inference_steps=40,",
+   "confidence": "high"
+  },
+  {
+   "recipe": "sdxl-checkpoint",
+   "family": "Stable Diffusion XL base 1.0",
+   "names": [
+    "sd_xl_base_1.0",
+    "sd_xl_base_1.0_0.9vae",
+    "sdxl_base_1.0",
+    "stable-diffusion-xl-base-1.0"
+   ],
+   "steps": 50,
+   "source": "https://raw.githubusercontent.com/huggingface/diffusers/main/src/diffusers/pipelines/stable_diffusion_xl/pipeline_stable_diffusion_xl.py",
+   "quote": "num_inference_steps: int = 50,",
+   "confidence": "high"
+  },
+  {
+   "recipe": "sd1-checkpoint",
+   "family": "Stable Diffusion 1.x",
+   "names": [
+    "v1-5-pruned-emaonly",
+    "v1-5-pruned",
+    "sd-v1-4",
+    "sd-v1-5",
+    "stable-diffusion-v1-5",
+    "stable-diffusion-v1-4"
+   ],
+   "steps": 50,
+   "source": "https://raw.githubusercontent.com/huggingface/diffusers/main/src/diffusers/pipelines/stable_diffusion/pipeline_stable_diffusion.py",
+   "quote": "num_inference_steps: int = 50,",
+   "confidence": "high"
+  },
+  {
+   "recipe": "sd2-512-checkpoint",
+   "family": "Stable Diffusion 2.x (512)",
+   "names": [
+    "v2-1_512-ema-pruned",
+    "v2-1_512-nonema-pruned",
+    "512-base-ema"
+   ],
+   "steps": 50,
+   "source": "https://raw.githubusercontent.com/huggingface/diffusers/main/src/diffusers/pipelines/stable_diffusion/pipeline_stable_diffusion.py",
+   "quote": "num_inference_steps: int = 50,",
+   "confidence": "medium"
+  },
+  {
+   "recipe": "sd2-768-checkpoint",
+   "family": "Stable Diffusion 2.x (768)",
+   "names": [
+    "v2-1_768-ema-pruned",
+    "v2-1_768-nonema-pruned",
+    "768-v-ema"
+   ],
+   "steps": 50,
+   "source": "https://raw.githubusercontent.com/huggingface/diffusers/main/src/diffusers/pipelines/stable_diffusion/pipeline_stable_diffusion.py",
+   "quote": "num_inference_steps: int = 50,",
+   "confidence": "medium"
+  },
+  {
+   "recipe": "chroma",
+   "family": "Chroma1-HD",
+   "names": [
+    "chroma1-hd",
+    "chroma-hd"
+   ],
+   "steps": 40,
+   "source": "https://huggingface.co/lodestones/Chroma1-HD/raw/main/README.md",
+   "quote": "image = pipe(prompt=prompt, negative_prompt=negative_prompt, generator=torch.Generator(\"cpu\").manual_seed(433), num_inference_steps=40, guidance_scale=3.0, num_images_per_prompt=1,)",
+   "confidence": "high"
+  },
+  {
+   "recipe": "chroma-radiance",
+   "family": "Chroma1-Radiance",
+   "names": [
+    "chroma1-radiance"
+   ],
+   "steps": 50,
+   "source": "https://huggingface.co/lodestones/Chroma1-Radiance/raw/main/inference_reference_code.py",
+   "quote": "p.add_argument(\"--steps\", type=int, default=50, help=(\"Number of Euler integration steps. ... 28 is a fast setting; 50 is the quality default.\")) ; module docstring: \"cfg=3.5 steps=50 mu=1.0 resolutio",
+   "confidence": "high"
+  },
+  {
+   "recipe": "flux2-klein-base-4b",
+   "family": "FLUX.2 klein base 4B",
+   "names": [
+    "flux-2-klein-base-4b",
+    "flux2-klein-base-4b",
+    "flux.2-klein-base-4b"
+   ],
+   "steps": 50,
+   "source": "https://huggingface.co/black-forest-labs/FLUX.2-klein-base-4B/raw/main/README.md",
+   "quote": "image = pipe(prompt=prompt, height=1024, width=1024, guidance_scale=4.0, num_inference_steps=50, generator=torch.Generator(device=device).manual_seed(0)).images[0]",
+   "confidence": "high",
+   "with_picture": true
+  },
+  {
+   "recipe": "flux2-klein-base-9b",
+   "family": "FLUX.2 klein base 9B",
+   "names": [
+    "flux-2-klein-base-9b",
+    "flux2-klein-base-9b",
+    "flux.2-klein-base-9b"
+   ],
+   "steps": 50,
+   "source": "https://huggingface.co/black-forest-labs/FLUX.2-klein-base-9B",
+   "quote": "image = pipe(prompt=prompt, height=1024, width=1024, guidance_scale=4.0, num_inference_steps=50, generator=torch.Generator(device=device).manual_seed(0)).images[0]",
+   "confidence": "high",
+   "with_picture": true
+  },
+  {
+   "recipe": "flux2-klein-4b",
+   "family": "FLUX.2 klein 4B",
+   "names": [
+    "flux-2-klein-4b",
+    "flux2-klein-4b",
+    "flux.2-klein-4b"
+   ],
+   "with_picture": true
+  },
+  {
+   "recipe": "flux2-klein-9b",
+   "family": "FLUX.2 klein 9B",
+   "names": [
+    "flux-2-klein-9b",
+    "flux2-klein-9b",
+    "flux.2-klein-9b"
+   ],
+   "with_picture": true
+  },
+  {
+   "recipe": "flux3-klein-base",
+   "family": "FLUX 3 klein base",
+   "names": [
+    "flux-3-image-klein-base",
+    "flux3-klein-base"
+   ],
+   "steps": 50,
+   "source": "https://raw.githubusercontent.com/black-forest-labs/flux-3-image-klein/main/src/flux3/pipeline.py",
+   "quote": "pipeline.py: \"base\": {\"dit\": \"flux-3-image-klein-base\", \"steps\": 50, \"guidance\": 4.0}, ; cli.py: --model ... help=\"base: 50 steps, CFG 4; distilled: 16 steps, no CFG\" ; default_size docstring: \"1024x1",
+   "confidence": "high",
+   "with_picture": true
+  },
+  {
+   "recipe": "flux3-klein",
+   "family": "FLUX 3 klein",
+   "names": [
+    "flux-3-image-klein",
+    "flux3-klein"
+   ],
+   "with_picture": true
+  },
+  {
+   "recipe": "hunyuan-video-15-t2v",
+   "family": "HunyuanVideo 1.5 (720p T2V)",
+   "names": [
+    "hunyuanvideo1.5_720p_t2v",
+    "hunyuanvideo-1.5-720p-t2v",
+    "hunyuan_video_1.5_720p_t2v"
+   ],
+   "steps": 50,
+   "source": "https://huggingface.co/tencent/HunyuanVideo-1.5/raw/main/README.md",
+   "quote": "Optimal inference configurations table: \"| 720p T2V | 6 | None | 9 | 50 |\" (columns: Model | CFG Scale | Embedded CFG Scale | Flow Shift | Inference Steps); CLI table: \"| `--num_inference_steps` | int",
+   "confidence": "high",
+   "video": true
+  },
+  {
+   "recipe": "hunyuan-video-15-i2v",
+   "family": "HunyuanVideo 1.5 (720p I2V)",
+   "names": [
+    "hunyuanvideo1.5_720p_i2v",
+    "hunyuanvideo-1.5-720p-i2v",
+    "hunyuan_video_1.5_720p_i2v"
+   ],
+   "steps": 50,
+   "source": "https://huggingface.co/tencent/HunyuanVideo-1.5/raw/main/README.md",
+   "quote": "Optimal inference configurations table: \"| 720p I2V | 6 | None | 7 | 50 |\" (columns: Model | CFG Scale | Embedded CFG Scale | Flow Shift | Inference Steps); CLI table: \"| `--num_inference_steps` | int",
+   "confidence": "high",
+   "video": true,
+   "with_picture": true
+  },
+  {
+   "recipe": "lingbot-video-dense",
+   "family": "LingBot-Video dense 1.3B",
+   "names": [
+    "lingbot-video-dense-1.3b"
+   ],
+   "steps": 40,
+   "source": "https://huggingface.co/robbyant/lingbot-video-dense-1.3b/raw/main/README.md",
+   "quote": "python scripts/inference.py ... --run_refiner --mode t2v ... --height 480 --width 832 --fps 24 --steps 40 --refiner_steps 8 --guidance_scale 3 --refiner_guidance_scale 3 --shift 3 --refiner_shift 3",
+   "confidence": "high",
+   "video": true,
+   "shift": 3
+  },
+  {
+   "recipe": "lingbot-video-moe",
+   "family": "LingBot-Video MoE 30B-A3B",
+   "names": [
+    "lingbot-video-moe-30b-a3b"
+   ],
+   "steps": 40,
+   "source": "https://huggingface.co/robbyant/lingbot-video-moe-30b-a3b/raw/main/README.md",
+   "quote": "python scripts/inference.py ... --run_refiner --mode t2v ... --height 480 --width 832 --fps 24 --steps 40 --refiner_steps 8 --guidance_scale 3 --refiner_guidance_scale 3 --shift 3 --refiner_shift 3",
+   "confidence": "high",
+   "video": true,
+   "shift": 3
+  },
+  {
+   "recipe": "ernie-image",
+   "family": "ERNIE-Image",
+   "names": [
+    "ernie-image"
+   ],
+   "steps": 50,
+   "source": "https://huggingface.co/baidu/ERNIE-Image/raw/main/README.md",
+   "quote": "\"### Recommended Parameters ... - Guidance scale: 4.0 - Inference steps: 50\" and example \"height=1264, width=848, num_inference_steps=50, guidance_scale=4.0, use_pe=True\"",
+   "confidence": "high"
+  },
+  {
+   "recipe": "ernie-image-turbo",
+   "family": "ERNIE-Image-Turbo",
+   "names": [
+    "ernie-image-turbo"
+   ]
+  },
+  {
+   "recipe": "longcat-image",
+   "family": "LongCat-Image",
+   "names": [
+    "longcat-image"
+   ],
+   "steps": 50,
+   "source": "https://huggingface.co/meituan-longcat/LongCat-Image/raw/main/README.md",
+   "quote": "image = pipe(prompt, height=768, width=1344, guidance_scale=4.0, num_inference_steps=50, num_images_per_prompt=1, generator=torch.Generator(\"cpu\").manual_seed(43), enable_cfg_renorm=True, enable_promp",
+   "confidence": "high"
+  },
+  {
+   "recipe": "longcat-image-edit",
+   "family": "LongCat-Image-Edit",
+   "names": [
+    "longcat-image-edit"
+   ],
+   "steps": 50,
+   "source": "https://huggingface.co/meituan-longcat/LongCat-Image-Edit/raw/main/README.md",
+   "quote": "image = pipe(img, prompt, negative_prompt='', guidance_scale=4.5, num_inference_steps=50, num_images_per_prompt=1, generator=torch.Generator(\"cpu\").manual_seed(43)).images[0]",
+   "confidence": "high",
+   "with_picture": true
+  },
+  {
+   "recipe": "ovis-image",
+   "family": "Ovis-Image-7B",
+   "names": [
+    "ovis-image-7b",
+    "ovis-image"
+   ],
+   "steps": 50,
+   "source": "https://huggingface.co/ATH-MaaS/Ovis-Image-7B",
+   "quote": "image = pipe(prompt, negative_prompt=\"\", num_inference_steps=50, guidance_scale=5.0).images[0]",
+   "confidence": "high"
+  },
+  {
+   "recipe": "krea2-raw",
+   "family": "Krea 2 Raw",
+   "names": [
+    "krea-2-raw"
+   ],
+   "steps": 52,
+   "source": "https://huggingface.co/krea/Krea-2-Raw",
+   "quote": "uv run inference.py \"a fox walking in the snow\" --checkpoint oss_raw --steps 52 --cfg 3.5 --width 1024 --height 1024 ; image = pipe(\"a fox in the snow\", num_inference_steps=52, guidance_scale=3.5).ima",
+   "confidence": "high"
+  },
+  {
+   "recipe": "krea2-turbo",
+   "family": "Krea 2 Turbo",
+   "names": [
+    "krea-2-turbo"
+   ]
+  },
+  {
+   "recipe": "fibo2-dev",
+   "family": "Fibo 2.0 dev",
+   "names": [
+    "fibo-2.0-dev"
+   ],
+   "steps": 50,
+   "source": "https://huggingface.co/briaai/Fibo-2.0-dev",
+   "quote": "\"Full base model. Use num_inference_steps=50 and guidance_scale=5.0.\" and example: image = pipe(prompt=vgl(scene), negative_prompt=NEGATIVE_T2I, width=1424, height=800, num_inference_steps=50, guidanc",
+   "confidence": "high"
+  },
+  {
+   "recipe": "boogu-image",
+   "family": "Boogu-Image 0.1 Base",
+   "names": [
+    "boogu-image-0.1-base"
+   ],
+   "steps": 50,
+   "source": "https://huggingface.co/Boogu/Boogu-Image-0.1-Base/raw/main/README.md",
+   "quote": "Quick Start example: \"--num_inference_steps 50 \\ --height 1024 --width 1024 \\ --text_guidance_scale 4.0\"; Model Zoo row for Boogu-Image-0.1-Base: Steps \"25~50\", CFG \"2.0~5.0 (e.g., 4.0)\"",
+   "confidence": "high"
+  },
+  {
+   "recipe": "boogu-image-edit",
+   "family": "Boogu-Image 0.1 Edit",
+   "names": [
+    "boogu-image-0.1-edit"
+   ],
+   "steps": 50,
+   "source": "https://huggingface.co/Boogu/Boogu-Image-0.1-Edit/raw/main/README.md",
+   "quote": "Quick Start example: \"--num_inference_steps 50 \\ --height 1024 --width 1024 \\ --text_guidance_scale 5.0 --image_guidance_scale 1.0\"; Model Zoo row for Boogu-Image-0.1-Edit: Steps \"25~50\", CFG \"2.0~5.0",
+   "confidence": "high",
+   "with_picture": true
+  },
+  {
+   "recipe": "flex2",
+   "family": "Flex.2-preview",
+   "names": [
+    "flex.2-preview",
+    "flex2-preview"
+   ],
+   "steps": 50,
+   "source": "https://huggingface.co/ostris/Flex.2-preview/raw/main/README.md",
+   "quote": "image = pipe(prompt=\"A white friendly robotic dog sitting on a bench\", ..., height=1024, width=1024, guidance_scale=3.5, num_inference_steps=50, generator=torch.Generator(\"cpu\").manual_seed(42))",
+   "confidence": "high"
+  },
+  {
+   "recipe": "iris-3b",
+   "family": "Iris 3B",
+   "names": [
+    "iris-3b"
+   ],
+   "steps": 100,
+   "source": "https://huggingface.co/speridlabs/iris-3b/raw/main/README.md",
+   "quote": "\"Generated at native aspect ratios of about one megapixel with the default settings (CFG 3, 100 steps).\" ; Tips table: \"| `--cfg-scale` | 3 |\" / \"| `--steps` | 100 | Number of denoising steps. Fewer s",
+   "confidence": "high"
+  },
+  {
+   "recipe": "moss-image-base",
+   "family": "MOSS-Image-Base",
+   "names": [
+    "moss-image-base"
+   ],
+   "steps": 50,
+   "source": "https://huggingface.co/OpenMOSS-Team/MOSS-Image-Base/raw/main/README.md",
+   "quote": "example: height=1024, width=1024, num_inference_steps=50, guidance_scale=3.0 ; Sampling settings table: \"| Sampler | Flow-matching Euler |\", \"| Steps | 50 |\", \"| CFG | 3 |\", \"| Shift | 5 |\", \"| Layer ",
+   "confidence": "high"
+  },
+  {
+   "recipe": "moss-image-sft",
+   "family": "MOSS-Image-SFT",
+   "names": [
+    "moss-image-sft"
+   ],
+   "steps": 50,
+   "source": "https://huggingface.co/OpenMOSS-Team/MOSS-Image-SFT/raw/main/README.md",
+   "quote": "example: height=1024, width=1024, num_inference_steps=50, guidance_scale=3.0 ; Sampling settings table: \"| Steps | 50 |\", \"| CFG | 3 |\", \"| Shift | 5 |\"",
+   "confidence": "high"
+  },
+  {
+   "recipe": "sefi-image",
+   "family": "SeFi-Image 5B Base",
+   "names": [
+    "sefi-image-5b-base"
+   ],
+   "steps": 50,
+   "source": "https://huggingface.co/SeFi-Image/SeFi-Image-5B-Base",
+   "quote": "Model Zoo row: Base | SeFi-Image-5B-Base | SeFi-Image/SeFi-Image-5B-Base | 50 | 4.0 (columns Family | Model | Checkpoint | Steps | Guidance)",
+   "confidence": "high"
+  },
+  {
+   "recipe": "sensenova-u15",
+   "family": "SenseNova-U1.5 8B MoT",
+   "names": [
+    "sensenova-u1.5-8b-mot"
+   ],
+   "steps": 50,
+   "source": "https://raw.githubusercontent.com/OpenSenseNova/SenseNova-U1/main/examples/README.md",
+   "quote": "--cfg_scale 4.0 --cfg_norm none --timestep_shift 3.0 --num_steps 50 \\",
+   "confidence": "high"
+  },
+  {
+   "recipe": "llada-image",
+   "family": "LLaDA-Image",
+   "names": [
+    "llada-image"
+   ],
+   "steps": 50,
+   "source": "https://huggingface.co/inclusionAI/LLaDA-Image/raw/main/README.md",
+   "quote": "\"Use the Base checkpoint for high-fidelity generation and editing. Its recommended sampling configuration is **50 steps**.\" ; example: height=1024, width=1024, num_inference_steps=50, guidance_scale=5",
+   "confidence": "high"
+  },
+  {
+   "recipe": "llada-image-turbo",
+   "family": "LLaDA-Image-Turbo",
+   "names": [
+    "llada-image-turbo"
+   ]
+  },
+  {
+   "recipe": "lens",
+   "family": "Lens",
+   "names": [
+    "lens"
+   ],
+   "steps": 20,
+   "source": "https://raw.githubusercontent.com/microsoft/Lens/main/README.md",
+   "quote": "Checkpoints table: \"| `microsoft/Lens` | **Default.** RL-tuned for visual quality | 20 | 5.0 |\" ; example: \"base_resolution=1440, aspect_ratio=\\\"1:1\\\", num_inference_steps=20, guidance_scale=5.0\" ; in",
+   "confidence": "high"
+  },
+  {
+   "recipe": "lens-turbo",
+   "family": "Lens-Turbo",
+   "names": [
+    "lens-turbo"
+   ]
+  },
+  {
+   "recipe": "mage-flow",
+   "family": "Mage-Flow 4B",
+   "names": [
+    "mage-flow",
+    "mage-flow-4b"
+   ],
+   "steps": 20,
+   "source": "https://raw.githubusercontent.com/microsoft/Mage/main/mage_flow/README.md",
+   "quote": "Model table: \"| `Mage-Flow-4B` | text→image | RL-aligned | 20 | microsoft/Mage-Flow |\" ; example: pipe = MageFlowPipeline.from_pretrained(\"microsoft/Mage-Flow\", device=\"cuda\") ... steps=20, cfg=5.0, h",
+   "confidence": "high"
+  },
+  {
+   "recipe": "mage-flow-turbo",
+   "family": "Mage-Flow-Turbo",
+   "names": [
+    "mage-flow-turbo"
+   ]
+  },
+  {
+   "recipe": "mage-flow-edit",
+   "family": "Mage-Flow-Edit 4B",
+   "names": [
+    "mage-flow-edit",
+    "mage-flow-edit-4b"
+   ],
+   "steps": 30,
+   "source": "https://raw.githubusercontent.com/microsoft/Mage/main/mage_flow/README.md",
+   "quote": "Model table: \"| `Mage-Flow-Edit-4B` | editing | RL-aligned | 30 | microsoft/Mage-Flow-Edit |\" ; example: img = pipe.edit([\"Replace the background with a field of sunflowers\"], [\"assets/dog.jpg\"], step",
+   "confidence": "high",
+   "with_picture": true
+  },
+  {
+   "recipe": "pixart-alpha-1024",
+   "family": "PixArt-alpha 1024",
+   "names": [
+    "pixart-xl-2-1024-ms"
+   ],
+   "steps": 20,
+   "source": "https://raw.githubusercontent.com/huggingface/diffusers/main/src/diffusers/pipelines/pixart_alpha/pipeline_pixart_alpha.py",
+   "quote": "num_inference_steps: int = 20,",
+   "confidence": "high"
+  },
+  {
+   "recipe": "pixart-alpha-512",
+   "family": "PixArt-alpha 512",
+   "names": [
+    "pixart-xl-2-512x512"
+   ],
+   "steps": 20,
+   "source": "https://raw.githubusercontent.com/huggingface/diffusers/main/src/diffusers/pipelines/pixart_alpha/pipeline_pixart_alpha.py",
+   "quote": "num_inference_steps: int = 20,",
+   "confidence": "high"
+  },
+  {
+   "recipe": "pixart-sigma",
+   "family": "PixArt-Sigma 1024",
+   "names": [
+    "pixart-sigma-xl-2-1024-ms"
+   ],
+   "steps": 20,
+   "source": "https://raw.githubusercontent.com/huggingface/diffusers/main/src/diffusers/pipelines/pixart_alpha/pipeline_pixart_sigma.py",
+   "quote": "num_inference_steps: int = 20,",
+   "confidence": "high"
+  }
+ ]
+}

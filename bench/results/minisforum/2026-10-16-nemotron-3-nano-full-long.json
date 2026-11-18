@@ -1,0 +1,213 @@
+{
+ "model": "sha256-de487fada12adce0b32a2f49a452175b558afa3fda28d9182848ba14d043ffa1",
+ "date": "2026-10-16 15:39:02",
+ "settings": {
+  "model": "%USERPROFILE%\\.ollama\\models\\blobs\\sha256-de487fada12adce0b32a2f49a452175b558afa3fda28d9182848ba14d043ffa1",
+  "llama_server": "%USERPROFILE%\\AppData\\Local\\Kera\\compare\\llama-b11619\\llama-server.exe",
+  "kera": "%USERPROFILE%\\AppData\\Local\\Kera\\compare\\kera-full\\kera-dev-windows-x64\\kera.exe",
+  "engines": "ollama,kera,stock",
+  "ollama": "nemotron-3-nano:30b",
+  "ollama_url": "http://127.0.0.1:11500",
+  "ngl": "99",
+  "ctx": 131072,
+  "runs": 3,
+  "max_tokens": 256,
+  "turns": 12,
+  "turn_words": 150,
+  "system_words": 300,
+  "extra": "",
+  "port": 8571,
+  "out": "%USERPROFILE%\\AppData\\Local\\Kera\\compare\\results\\compare-full-long.json",
+  "quick": false,
+  "long": "8000,32000,64000,100000",
+  "chars_per_token": 3.25,
+  "stall": null
+ },
+ "ollama": {
+  "load_seconds": 65.6520791053772,
+  "long": [
+   {
+    "size": 8000,
+    "prompt_tokens": 7695,
+    "first_word_s": 8.96393346786499,
+    "read_per_s": 885.0442021783704,
+    "words_per_s": 41.30350513265821,
+    "follow_up_s": 1.1492714881896973,
+    "follow_up_read": 7863
+   },
+   {
+    "size": 32000,
+    "prompt_tokens": 33602,
+    "first_word_s": 39.38443875312805,
+    "read_per_s": 860.8621826051065,
+    "words_per_s": 40.27520083834981,
+    "follow_up_s": 1.3601303100585938,
+    "follow_up_read": 33725
+   },
+   {
+    "size": 64000,
+    "prompt_tokens": 64022,
+    "first_word_s": 85.92038440704346,
+    "read_per_s": 749.119352994524,
+    "words_per_s": 38.181930432214834,
+    "follow_up_s": 1.81380295753479,
+    "follow_up_read": 64290
+   },
+   {
+    "size": 100000,
+    "prompt_tokens": 95418,
+    "first_word_s": 144.45314574241638,
+    "read_per_s": 663.2618695743475,
+    "words_per_s": 36.45565582443184,
+    "follow_up_s": 2.2006704807281494,
+    "follow_up_read": 95695
+   }
+  ]
+ },
+ "kera": {
+  "load_seconds": 36.96873998641968,
+  "long": [
+   {
+    "size": 8000,
+    "prompt_tokens": 7694,
+    "first_word_s": 6.897690773010254,
+    "read_per_s": 1120.1123198670423,
+    "words_per_s": 57.30427220203463,
+    "follow_up_s": 0.23279237747192383,
+    "follow_up_read": 22
+   },
+   {
+    "size": 32000,
+    "prompt_tokens": 33596,
+    "first_word_s": 51.18426728248596,
+    "read_per_s": 658.462088451395,
+    "words_per_s": 53.261860406173724,
+    "follow_up_s": 0.31662416458129883,
+    "follow_up_read": 21
+   },
+   {
+    "size": 64000,
+    "prompt_tokens": 64016,
+    "first_word_s": 147.9421637058258,
+    "read_per_s": 433.6011729556549,
+    "words_per_s": 47.140443777508374,
+    "follow_up_s": 0.3525683879852295,
+    "follow_up_read": 21
+   },
+   {
+    "size": 100000,
+    "prompt_tokens": 95412,
+    "first_word_s": 295.93142461776733,
+    "read_per_s": 322.8516704506564,
+    "words_per_s": 43.07133118139431,
+    "follow_up_s": 0.4318962097167969,
+    "follow_up_read": 21
+   }
+  ]
+ },
+ "stock": {
+  "load_seconds": 24.824062824249268,
+  "long": [
+   {
+    "size": 8000,
+    "prompt_tokens": 7694,
+    "first_word_s": 7.019038915634155,
+    "read_per_s": 1100.9740916212495,
+    "words_per_s": 58.02468939156222,
+    "follow_up_s": 0.2285761833190918,
+    "follow_up_read": 22
+   },
+   {
+    "size": 32000,
+    "prompt_tokens": 33596,
+    "first_word_s": 51.55250287055969,
+    "read_per_s": 653.1628608595519,
+    "words_per_s": 50.78987004798767,
+    "follow_up_s": 0.26012682914733887,
+    "follow_up_read": 21
+   },
+   {
+    "size": 64000,
+    "prompt_tokens": 64016,
+    "first_word_s": 150.52757120132446,
+    "read_per_s": 425.7744409484019,
+    "words_per_s": 47.337840549556496,
+    "follow_up_s": 0.3353424072265625,
+    "follow_up_read": 21
+   },
+   {
+    "size": 100000,
+    "prompt_tokens": 95412,
+    "first_word_s": 302.59355878829956,
+    "read_per_s": 315.5723076548468,
+    "words_per_s": 42.85604481041926,
+    "follow_up_s": 0.4070749282836914,
+    "follow_up_read": 21
+   }
+  ]
+ },
+ "kera_rocm": {
+  "load_seconds": 42.5855815410614,
+  "long": [
+   {
+    "size": 8000,
+    "prompt_tokens": 7694,
+    "first_word_s": 9.106746673583984,
+    "read_per_s": 848.4790070920891,
+    "words_per_s": 45.37490884981546,
+    "follow_up_s": 0.19727563858032227,
+    "follow_up_read": 22
+   },
+   {
+    "size": 32000,
+    "prompt_tokens": 33596,
+    "first_word_s": 40.55760645866394,
+    "read_per_s": 832.2169316759213,
+    "words_per_s": 42.701727909797285,
+    "follow_up_s": 0.22817707061767578,
+    "follow_up_read": 21
+   },
+   {
+    "size": 64000,
+    "prompt_tokens": 64016,
+    "first_word_s": 84.95383882522583,
+    "read_per_s": 755.9731872314221,
+    "words_per_s": 41.24968584538653,
+    "follow_up_s": 0.25081849098205566,
+    "follow_up_read": 21
+   },
+   {
+    "size": 100000,
+    "prompt_tokens": 95412,
+    "first_word_s": 138.19585013389587,
+    "read_per_s": 692.3454115118425,
+    "words_per_s": 38.83256029717054,
+    "follow_up_s": 0.327852725982666,
+    "follow_up_read": 21
+   }
+  ]
+ },
+ "settings_kera_rocm": {
+  "model": "%USERPROFILE%\\.ollama\\models\\blobs\\sha256-de487fada12adce0b32a2f49a452175b558afa3fda28d9182848ba14d043ffa1",
+  "llama_server": "%USERPROFILE%\\AppData\\Local\\Kera\\compare\\llama-b11619\\llama-server.exe",
+  "kera": "%USERPROFILE%\\AppData\\Local\\Kera\\compare\\kera-full\\kera-dev-windows-x64\\kera.exe",
+  "engines": "kera",
+  "ollama": null,
+  "ollama_url": "http://127.0.0.1:11434",
+  "ngl": "99",
+  "ctx": 131072,
+  "runs": 3,
+  "max_tokens": 256,
+  "turns": 12,
+  "turn_words": 150,
+  "system_words": 300,
+  "extra": "--backend hip",
+  "port": 8571,
+  "out": "%USERPROFILE%\\AppData\\Local\\Kera\\compare\\results\\compare-full-long-rocm.json",
+  "quick": false,
+  "long": "8000,32000,64000,100000",
+  "chars_per_token": 3.25,
+  "stall": null
+ },
+ "about": "The full test's long documents (llama.cpp's own source files, 8K to 95K words, then a follow-up; 128K context): Ollama (ROCm), Kera (Vulkan) and stock llama.cpp b11619 (Vulkan) in one run, then Kera with the ROCm add-on."
+}

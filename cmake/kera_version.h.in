@@ -1,0 +1,5 @@
+#pragma once
+
+#define KERA_VERSION       "@PROJECT_VERSION@"
+#define KERA_GIT_COMMIT    "@KERA_GIT_COMMIT@"
+#define KERA_LLAMA_CPP_TAG "@KERA_LLAMA_CPP_TAG@"

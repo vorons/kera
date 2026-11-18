@@ -1,0 +1,57 @@
+// trellis.cpp — GGUF model container shared by every TRELLIS.2 component.
+#pragma once
+
+#include <map>
+#include <string>
+#include <vector>
+#include <cstdint>
+
+struct ggml_tensor;
+struct ggml_context;
+struct gguf_context;
+struct ggml_backend;
+struct ggml_backend_buffer;
+struct ggml_backend_sched;
+
+namespace trellis {
+
+// Quantized 2D weights whose contraction dim (ne0) is below this are expanded to F16 at load.
+// ggml-vulkan's integer-dot Q8_0 matmul miscomputes K = 32/64 on RDNA2 + the AMD Windows
+// driver (issue #50); K >= 128 was measured fine. tools/quantize_gguf.py uses the same bound.
+constexpr int64_t kMinQuantK = 128;
+
+// A loaded GGUF: tensor metadata (ggml_context), the weights uploaded to a
+// backend buffer (CUDA or CPU), and a name -> tensor lookup. One per checkpoint.
+struct Model {
+    gguf_context*         gguf   = nullptr;  // KV metadata + tensor table
+    ggml_context*         meta   = nullptr;  // owns the ggml_tensor structs
+    ggml_backend*         backend = nullptr; // where weights live
+    ggml_backend_buffer*  buffer = nullptr;  // weights in the backend's default buffer
+    // Optional backend-specific buffer for repacked quantized matrix weights.
+    ggml_backend_buffer*  buffer_repack = nullptr;
+    ggml_context*         ctx_host   = nullptr;   // owns the tensors in `buffer`
+    ggml_context*         ctx_repack = nullptr;   // owns the tensors in `buffer_repack`
+    // Multi-backend scheduler over [backend, ...fallbacks]. Non-null only when the
+    // primary backend has partial op coverage (e.g. the Hexagon NPU), in which case every
+    // graph runs through it so unsupported ops land on a backend that can execute them.
+    ggml_backend_sched*   sched  = nullptr;
+    std::map<std::string, ggml_tensor*> tensors;
+    std::string arch;          // general.architecture
+    std::string config_json;   // trellis.config_json (raw model config)
+    bool on_gpu = false;
+
+    // gpu < 0 -> CPU backend; otherwise CUDA device index.
+    static Model load(const std::string& path, int gpu = 0);
+
+    ggml_tensor* get(const std::string& name) const;        // throws if missing
+    ggml_tensor* try_get(const std::string& name) const;    // nullptr if missing
+    bool has(const std::string& name) const;
+
+    size_t total_bytes() const;
+    void free();
+};
+
+// Read a tensor's full contents back to host as float32 (handles f16/f32).
+std::vector<float> tensor_to_f32(ggml_tensor* t);
+
+} // namespace trellis

@@ -1,0 +1,170 @@
+{
+ "cache_state": "warm",
+ "ceiling_tok_s": null,
+ "date": "2026-10-15T19:45:35Z",
+ "gates": {},
+ "kera": {
+  "commit": "ed84fc4aa7bd",
+  "llama_cpp": "b11619",
+  "version": "0.1.0"
+ },
+ "label": "Kera, experts streamed (14 GB cache)",
+ "load_s": 3.7,
+ "machine": {
+  "chip": "AMD RYZEN AI MAX+ 395 w/ Radeon 8060S",
+  "devices": [
+   "Vulkan0: AMD Radeon(TM) 8060S Graphics",
+   "CPU: AMD RYZEN AI MAX+ 395 w/ Radeon 8060S          "
+  ],
+  "gpu": "AMD Radeon(TM) 8060S Graphics",
+  "os": "Windows 11 (build 26100)",
+  "profile_hash": "bc856b4f416fa1b0",
+  "ram_gb": 61.65
+ },
+ "model": {
+  "architecture": "gpt-oss",
+  "desc": "gpt-oss 120B MXFP4 MoE",
+  "file": "gpt-oss-120b-MXFP4.gguf",
+  "hash": "xxh128:85d586028f6c68a97335fe08f53ff9bf",
+  "n_params": 116829156672,
+  "size_gb": 63.37
+ },
+ "peak_ram_gb": 15.45,
+ "results": [
+  {
+   "accept_rate": null,
+   "decode_tok_s": 2.44,
+   "expert_hit": 0.7297,
+   "k_histogram": null,
+   "kv_hit": null,
+   "n_gen": 128,
+   "n_prompt": 85,
+   "page_faults_per_tok": 126604.7,
+   "prefetch_acc": null,
+   "prefill_tok_s": 4.35,
+   "prompt_id": "short_chat",
+   "rendered_with": "model template",
+   "runs": [
+    {
+     "decode_tok_s": 2.44,
+     "prefill_tok_s": 4.29,
+     "ttft_ms": 19806.1
+    },
+    {
+     "decode_tok_s": 2.44,
+     "prefill_tok_s": 4.42,
+     "ttft_ms": 19244.5
+    }
+   ],
+   "ssd_gb_per_tok": 0.5151,
+   "stream": {
+    "experts_asked": 36576,
+    "gb_read": 130.833,
+    "guess_ms_per_tok": 0.0,
+    "guessed": 0,
+    "guessed_right": 0,
+    "in_memory": 26688,
+    "io_wait_ms_per_tok": 274.4,
+    "mode": "kera",
+    "on_their_way": 0,
+    "os_hint_gb": 0.0,
+    "read_early": 0,
+    "read_early_used": 0,
+    "read_while_waiting": 9888,
+    "step_ms_per_tok": 321.06
+   },
+   "ttft_ms": 19525.3
+  },
+  {
+   "accept_rate": null,
+   "decode_tok_s": 2.27,
+   "expert_hit": 0.7058,
+   "k_histogram": null,
+   "kv_hit": null,
+   "n_gen": 128,
+   "n_prompt": 254,
+   "page_faults_per_tok": 137719.4,
+   "prefetch_acc": null,
+   "prefill_tok_s": 9.24,
+   "prompt_id": "code",
+   "rendered_with": "model template",
+   "runs": [
+    {
+     "decode_tok_s": 2.27,
+     "prefill_tok_s": 9.16,
+     "ttft_ms": 27721.7
+    },
+    {
+     "decode_tok_s": 2.27,
+     "prefill_tok_s": 9.31,
+     "ttft_ms": 27271.4
+    }
+   ],
+   "ssd_gb_per_tok": 0.5605,
+   "stream": {
+    "experts_asked": 36576,
+    "gb_read": 142.37,
+    "guess_ms_per_tok": 0.0,
+    "guessed": 0,
+    "guessed_right": 0,
+    "in_memory": 25816,
+    "io_wait_ms_per_tok": 299.45,
+    "mode": "kera",
+    "on_their_way": 0,
+    "os_hint_gb": 0.0,
+    "read_early": 0,
+    "read_early_used": 0,
+    "read_while_waiting": 10760,
+    "step_ms_per_tok": 350.37
+   },
+   "ttft_ms": 27496.5
+  }
+ ],
+ "runs": 2,
+ "schema": "kera-bench-1",
+ "settings": {
+  "engine": {
+   "flash_attn": "auto",
+   "load_mode": "auto",
+   "n_batch": 2048,
+   "n_ctx": 512,
+   "n_gpu_layers": -1,
+   "n_threads": 16,
+   "n_ubatch": 512,
+   "repack": 1,
+   "sampling": "greedy",
+   "thinking": "default",
+   "type_k": "f16",
+   "type_v": "f16"
+  },
+  "kera": {
+   "chat.model_defaults": 1.0,
+   "gpu.shader_cache": 1.0,
+   "io.read_size_mib": 0.0,
+   "io.reader_threads": 0.0,
+   "kv.disk_budget_gb": 20.0,
+   "kv.store": 1.0,
+   "lossy.kv8": 0.0,
+   "lossy.reuse": 0.0,
+   "lossy.reuse_min_tokens": 256.0,
+   "lossy.route_margin": 0.0,
+   "setup.ram_test_mib": 1024.0,
+   "setup.ssd_cell_seconds": 0.8,
+   "setup.ssd_confirm_seconds": 3.0,
+   "setup.ssd_test_gb": 2.0,
+   "spec.auto": 1.0,
+   "spec.controller": 1.0,
+   "stream.budget_gb": 0.0,
+   "stream.io_threads": 8.0,
+   "stream.lookahead": 0.0,
+   "stream.mode": -1.0
+  },
+  "stream": {
+   "budget_gb": 14.0,
+   "expert_gb": 60.91,
+   "io_threads": 8,
+   "lookahead": false,
+   "mode": "kera"
+  }
+ }
+}

@@ -1,0 +1,51 @@
+{
+  "chip": "AMD RYZEN AI MAX+ 395 w/ Radeon 8060S",
+  "cpu_cores": 16,
+  "cpu_q4_gbps": 82.69,
+  "cpu_threads": 32,
+  "drives": [
+    {
+      "best_inflight": 4,
+      "best_read_mib": 16,
+      "device": "",
+      "direct": true,
+      "free_gb": 1590.55,
+      "label": "the C: drive",
+      "measured": true,
+      "note": "",
+      "path": "C:\\",
+      "read_gbps": 2.23,
+      "single_read_gbps": 1.2,
+      "total_gb": 2045.95,
+      "write_gbps": 3.09
+    }
+  ],
+  "gpu": {
+    "max_alloc_gb": 1.07,
+    "name": "AMD Radeon(TM) 8060S Graphics"
+  },
+  "gpu_q4_gbps": 212.77,
+  "gpus": [
+    {
+      "backend": "Vulkan",
+      "free_gb": 33.48,
+      "max_alloc_gb": 1.07,
+      "name": "AMD Radeon(TM) 8060S Graphics",
+      "total_gb": 35.24,
+      "unified": true
+    }
+  ],
+  "kera_version": "0.1.0",
+  "low_power_mode": false,
+  "measured_at": "2026-10-15T17:36:03Z",
+  "notes": [],
+  "os": "Windows 11 (build 26100)",
+  "os_family": "windows",
+  "ram_gb": 61.65,
+  "ram_gbps": {
+    "both": 199.86,
+    "cpu": 110.8,
+    "gpu": 213.99
+  },
+  "usable_gb": 48.32
+}

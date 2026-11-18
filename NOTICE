@@ -1,0 +1,81 @@
+Kera
+Copyright (c) 2026 Kera Labs
+
+Kera's own code is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+Kera includes or is built on the following third-party software. Each keeps
+its own licence and copyright notices.
+
+------------------------------------------------------------------------------
+llama.cpp and ggml
+  Location: third_party/llama.cpp (git subtree; the pinned release is in docs/UPSTREAM_PATCHES.md)
+  Source:   https://github.com/ggml-org/llama.cpp
+  Licence:  MIT. See third_party/llama.cpp/LICENSE and
+            third_party/llama.cpp/licenses/ for the code it bundles.
+  Copyright (c) 2023-2026 The ggml authors
+  It bundles nlohmann/json (MIT), cpp-httplib (MIT), xxHash (BSD-2-Clause),
+  rotate-bits (MIT) and public-domain code (SHA-1, SHA-256, miniaudio,
+  stb_image, subprocess.h). The Windows download adds LLVM's OpenMP runtime
+  (libomp.dll, Apache-2.0 with LLVM exceptions), and the Windows and Linux
+  downloads are built with the Khronos Vulkan headers (MIT).
+
+  The full licence texts of everything built into a download are in its
+  THIRD_PARTY_LICENSES.txt, and `kera licenses` prints them.
+
+------------------------------------------------------------------------------
+stable-diffusion.cpp (the image engine) and its own copy of ggml
+  Location: third_party/stable-diffusion.cpp (a copy at a pinned commit; see docs/UPSTREAM_PATCHES.md), built as
+            separate programs in the downloads' image folder
+  Source:   https://github.com/leejet/stable-diffusion.cpp and https://github.com/leejet/ggml
+  Licence:  MIT. See third_party/stable-diffusion.cpp/LICENSE and its ggml/LICENSE.
+  Copyright (c) 2023 leejet; Copyright (c) 2023-2026 The ggml authors
+  It bundles Oniguruma (BSD-2-Clause), utf8proc (MIT and the Unicode data licence), darts-clone
+  (BSD-2-Clause), nlohmann/json and cpp-httplib (MIT), miniz (MIT), zip (the Unlicense) and stb (public
+  domain); their texts are in THIRD_PARTY_LICENSES.txt.
+
+------------------------------------------------------------------------------
+acestep.cpp (the music engine) and its own copy of ggml
+  Location: third_party/acestep.cpp (a copy at a pinned commit; see docs/UPSTREAM_PATCHES.md), built as
+            separate programs in the downloads' music folder
+  Source:   https://github.com/ServeurpersoCom/acestep.cpp and https://github.com/ServeurpersoCom/ggml
+  Licence:  MIT. See third_party/acestep.cpp/LICENSE and its ggml/LICENSE.
+  Copyright (c) 2023-2026 The acestep.cpp authors; Copyright (c) 2023-2026 The ggml authors
+  It bundles cpp-httplib and yyjson (MIT) and minimp3 (CC0); their texts are in THIRD_PARTY_LICENSES.txt.
+  The music models themselves (ACE-Step 1.5) are not part of Kera: they are downloaded by the user.
+
+------------------------------------------------------------------------------
+trellis.cpp (the 3D engine) and its own copy of ggml
+  Location: third_party/trellis.cpp (a copy at a pinned commit; see docs/UPSTREAM_PATCHES.md), built as
+            separate programs in the downloads' 3d folder
+  Source:   https://github.com/pwilkin/trellis.cpp and https://github.com/pwilkin/ggml
+  Licence:  MIT. See third_party/trellis.cpp/LICENSE and its thirdparty/ggml/LICENSE.
+  Copyright (c) 2026 Piotr Wilkin; Copyright (c) 2023-2026 The ggml authors
+  Kera changed its CMakeLists.txt (marked "Kera:") and added kera/ggml_backend_dl_shim.cpp.
+  It bundles xatlas, meshoptimizer and Fast-Quadric-Mesh-Simplification (MIT) and stb (public domain); their
+  texts are in THIRD_PARTY_LICENSES.txt. Its optional quad retopology, which needs CGAL (GPL), is not part of
+  Kera. The 3D models themselves (TRELLIS.2, MIT; DINOv3, under Meta's DINOv3 License;
+  BiRefNet, MIT) are not part of Kera: they are downloaded by the user, who accepts their licences.
+
+------------------------------------------------------------------------------
+audio.cpp (the sound-effect engine) and its own copy of ggml
+  Location: third_party/audio.cpp (a copy at a pinned commit, with only its sound-effect models; see
+            docs/UPSTREAM_PATCHES.md), built as a separate program in the downloads' sfx folder
+  Source:   https://github.com/0xShug0/audio.cpp
+  Licence:  Apache-2.0. See third_party/audio.cpp/LICENSE; its ggml copy is MIT (external/ggml/LICENSE).
+  Copyright 2026 ShugoAI LLC; Copyright (c) 2023-2026 The ggml authors
+  Kera changed its CMakeLists.txt (marked "Kera:") and added kera/absent_model.cpp.
+  It bundles SentencePiece and Abseil (Apache-2.0), protobuf-lite (BSD-3-Clause), darts-clone (BSD-2-Clause),
+  esaxx, cJSON, libyaml and utf8proc (MIT); their texts are in THIRD_PARTY_LICENSES.txt. The sound-effect
+  models themselves (MOSS-SoundEffect v2, Apache-2.0; Stable Audio, the Stability AI Community License) are
+  not part of Kera: they are downloaded by the user.
+
+------------------------------------------------------------------------------
+GPT-2 tokenizer (tests only)
+  Location: tests/tiny_models/tokenizer/tokenizer.json, used by the tiny test models
+  Source:   https://huggingface.co/openai-community/gpt2
+  Licence:  MIT (modified MIT, as in https://github.com/openai/gpt-2/blob/master/LICENSE)
+  Copyright (c) 2019 OpenAI
+
+------------------------------------------------------------------------------
+Model weights are never bundled with Kera. Each model has its own licence,
+which the app shows before it downloads a model.

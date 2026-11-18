@@ -1,0 +1,99 @@
+{
+ "rows": [
+  {
+   "prompt": "a red fox sitting in fresh snow, wildlife photo",
+   "kera_vs_reference_same_seed": {
+    "mean_diff": 7.26,
+    "psnr_db": 28.0
+   },
+   "reference_vs_reference_other_seed": {
+    "mean_diff": 50.65,
+    "psnr_db": 12.0
+   },
+   "clip_reference": 34.66,
+   "clip_kera": 34.41
+  },
+  {
+   "prompt": "a bowl of ramen with a soft-boiled egg, top view",
+   "kera_vs_reference_same_seed": {
+    "mean_diff": 7.31,
+    "psnr_db": 27.6
+   },
+   "reference_vs_reference_other_seed": {
+    "mean_diff": 60.91,
+    "psnr_db": 10.2
+   },
+   "clip_reference": 31.11,
+   "clip_kera": 30.59
+  },
+  {
+   "prompt": "a lighthouse on a rocky coast at sunset",
+   "kera_vs_reference_same_seed": {
+    "mean_diff": 6.72,
+    "psnr_db": 28.0
+   },
+   "reference_vs_reference_other_seed": {
+    "mean_diff": 37.31,
+    "psnr_db": 14.4
+   },
+   "clip_reference": 32.4,
+   "clip_kera": 32.41
+  },
+  {
+   "prompt": "a portrait of an old fisherman with a grey beard",
+   "kera_vs_reference_same_seed": {
+    "mean_diff": 8.22,
+    "psnr_db": 27.1
+   },
+   "reference_vs_reference_other_seed": {
+    "mean_diff": 50.24,
+    "psnr_db": 12.2
+   },
+   "clip_reference": 35.23,
+   "clip_kera": 34.54
+  },
+  {
+   "prompt": "a cozy reading nook with books and a cat",
+   "kera_vs_reference_same_seed": {
+    "mean_diff": 8.15,
+    "psnr_db": 27.1
+   },
+   "reference_vs_reference_other_seed": {
+    "mean_diff": 54.34,
+    "psnr_db": 11.5
+   },
+   "clip_reference": 33.36,
+   "clip_kera": 32.37
+  },
+  {
+   "prompt": "a futuristic city street at night with neon signs",
+   "kera_vs_reference_same_seed": {
+    "mean_diff": 9.05,
+    "psnr_db": 25.7
+   },
+   "reference_vs_reference_other_seed": {
+    "mean_diff": 58.11,
+    "psnr_db": 10.5
+   },
+   "clip_reference": 34.6,
+   "clip_kera": 34.16
+  }
+ ],
+ "summary": {
+  "clip_reference": 33.56,
+  "clip_kera": 33.08,
+  "psnr_kera_vs_reference": 27.2,
+  "psnr_other_seed": 11.8
+ },
+ "setup": {
+  "model": "SD-Turbo, 512x512, 1 step, no guidance, seed 11, --rng cpu (PyTorch's CPU noise, so both start from the same noise)",
+  "reference": "Hugging Face diffusers 0.42.1, stabilityai/sd-turbo fp16 weights run in float32 on the CPU",
+  "kera": "kera image (stable-diffusion.cpp, unchanged) with Green-Sky/SD-Turbo-GGUF sd_turbo-f16-q8_0.gguf (8-bit) and sd_turbo-f16.gguf (16-bit)",
+  "clip": "openai/clip-vit-base-patch32, 100 x cosine(image, prompt)"
+ },
+ "full_precision_file": {
+  "psnr_kera_vs_reference": 46.7,
+  "clip_kera": 33.51,
+  "note": "sd_turbo-f16.gguf, the same 6 prompts and seed"
+ }
+}

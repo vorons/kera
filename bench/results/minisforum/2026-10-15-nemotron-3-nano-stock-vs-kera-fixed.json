@@ -1,0 +1,141 @@
+{
+ "about": "Stock llama.cpp b11619 against Kera 1fc1eea (the saved-chat fix N-005 and the replay fix N-009), both on Vulkan, warm (a repeat run: the first run of a new Kera folder compiles the graphics chip's shaders, N-010)",
+ "model": "sha256-de487fada12adce0b32a2f49a452175b558afa3fda28d9182848ba14d043ffa1",
+ "date": "2026-10-15 18:15:22",
+ "settings": {
+  "model": "%USERPROFILE%\\.ollama\\models\\blobs\\sha256-de487fada12adce0b32a2f49a452175b558afa3fda28d9182848ba14d043ffa1",
+  "llama_server": "%USERPROFILE%\\AppData\\Local\\Kera\\compare\\llama-b11619\\llama-server.exe",
+  "kera": "%USERPROFILE%\\AppData\\Local\\Kera\\compare\\kera-fix\\kera-dev-windows-x64\\kera.exe",
+  "engines": "stock,kera",
+  "ollama": null,
+  "ollama_url": "http://127.0.0.1:11434",
+  "ngl": "99",
+  "ctx": 16384,
+  "runs": 3,
+  "max_tokens": 256,
+  "turns": 12,
+  "turn_words": 150,
+  "system_words": 300,
+  "extra": "",
+  "port": 8571,
+  "out": "%USERPROFILE%\\AppData\\Local\\Kera\\compare\\results\\compare-fix3b.json",
+  "quick": false,
+  "long": null,
+  "chars_per_token": 3.0,
+  "stall": 120.0
+ },
+ "stock": {
+  "load_seconds": 23.344180583953857,
+  "writing": {
+   "code": {
+    "first_word_s": 0.4057481288909912,
+    "words_per_s": 61.852564346678044,
+    "read_per_s": 562.3478164062834,
+    "answer": "```python\nfrom __future__ import annotations\nfrom typing import List, Tuple\n\nInterval = Tuple[int, int]  # or Tuple[float, float] if you need floats\n\n\ndef merge_intervals(intervals: List[Interval]) -> List[Interval]:\n    \"\"\"\n    Merge a list of intervals, treating touching intervals as overlapping.\n\n    The algorithm runs in O(n log n) time:\n      1. Sort intervals by their start value.\n      2. Sweep through the sorted list, merging whenever the current\n         interval's start is <= the previous interval's end.\n\n    Parameters\n    ----------\n    intervals: List[Interval]\n        A list of (start, end) pairs. Each pair must satisfy start <= end.\n\n    Returns\n    -------\n    List[Interval]\n        A new list of merged, non\u2011overlapping intervals sorted by start.\n    \"\"\"\n    if not intervals:\n        return []\n\n    # 1\ufe0f\u20e3 Sort by start time (O(n log n))\n    sorted_intervals = sorted(intervals, key=lambda iv: iv[0])\n\n    merged: List[Interval] = [sorted_intervals[0]]\n\n    # 2\ufe0f\u20e3 Sweep and"
+   },
+   "long_context": {
+    "first_word_s": 3.57057523727417,
+    "words_per_s": 61.13050359595412,
+    "read_per_s": 1229.6366113584018,
+    "answer": "During the evening Mr. Darcy begins as a admired, handsome newcomer whose wealth and easy manners win the room\u2019s admiration, but as his proud, aloof behaviour\u2014refusing to dance with anyone but his close acquaintances and insulting the young ladies\u2014becomes evident, the guests\u2019 enthusiasm wanes and he is increasingly seen as arrogant and disagreeable; afterward Mrs. Bennet tells her husband that Darcy\u2019s rudeness was so shocking that she wishes he had been \u201csprained in the ankle\u201d and that she \u201cquite detests the man.\u201d"
+   },
+   "short_chat": {
+    "first_word_s": 0.40253281593322754,
+    "words_per_s": 62.68919780732475,
+    "read_per_s": 163.2472764112487,
+    "answer": "1. **Feed regularly** \u2013 Keep a consistent feeding schedule (e.g., every 12\u201324\u202fhours) using equal parts flour and water by weight.  \n2. **Maintain proper temperature** \u2013 Store it at a stable, moderate temperature (around 70\u202f\u00b0F/21\u202f\u00b0C) to encourage steady yeast activity.  \n3. **Use clean utensils and containers** \u2013 Avoid contamination by washing tools and using non\u2011metallic, breathable vessels."
+   },
+   "tool_call": {
+    "first_word_s": 0.6223611831665039,
+    "words_per_s": 60.873808594783014,
+    "read_per_s": 937.5175919871475,
+    "answer": "[{\"index\": 0, \"id\": \"vRY5fOcixaAZuLMxDkwhrEyGQ9HVIhlu\", \"type\": \"function\", \"function\": {\"name\": \"get_forecast\", \"arguments\": \"{\"}}][{\"index\": 0, \"function\": {\"arguments\": \"\\\"city\\\":\\\"\"}}][{\"index\": 0, \"function\": {\"arguments\": \"L\"}}][{\"index\": 0, \"function\": {\"arguments\": \"is\"}}][{\"index\": 0, \"function\": {\"arguments\": \"bon\"}}][{\"index\": 0, \"function\": {\"arguments\": \"\\\"\"}}][{\"index\": 0, \"function\": {\"arguments\": \",\\\"day\\\":\\\"\"}}][{\"index\": 0, \"function\": {\"arguments\": \"tom\"}}][{\"index\": 0, \"function\": {\"arguments\": \"orrow\"}}][{\"index\": 0, \"function\": {\"arguments\": \"\\\"\"}}][{\"index\": 0, \"function\": {\"arguments\": \",\\\"part_of_day\\\":\\\"\"}}][{\"index\": 0, \"function\": {\"arguments\": \"after\"}}][{\"index\": 0, \"function\": {\"arguments\": \"noon\"}}][{\"index\": 0, \"function\": {\"arguments\": \"\\\"\"}}][{\"index\": 0, \"function\": {\"arguments\": \",\\\"unit\\\":\\\"\"}}][{\"index\": 0, \"function\": {\"arguments\": \"c\"}}][{\"index\": 0, \"function\": {\"arguments\": \"elsius\"}}][{\"index\": 0, \"function\": {\"arguments\": \"\\\"\"}}][{\"index\": 0, \"function\": {\"arguments\": \"}\"}}]"
+   },
+   "code_rewrite": {
+    "first_word_s": 0.9722597599029541,
+    "words_per_s": 61.534852978757435,
+    "read_per_s": 1127.1582824643613,
+    "answer": "```cpp\n#include \"kvstore/kr_reuse.h\"\n\n#include <algorithm>\n#include <cmath>\n#include <unordered_map>\n\nnamespace kera {\n\nnamespace {\n\nconstexpr int      kAnchor  = 16;                    // tokens hashed to find where a passage may repeat\nconstexpr int      kCands   = 4;                     // places remembered per hash (the latest ones)\nconstexpr uint64_t kBase    = 0x100000001b3ULL;\n\nuint64_t pow_base(int k) {\n    uint64_t p = 1;\n    for (int i = 0; i < k; ++i) {\n        p *= kBase;\n    }\n    return p;\n}\n\n} // namespace\n\n/**\n * @brief Plan reuse copies of cached tokens for the upcoming prompt.\n *        This function identifies segments in the cached token stream that\n *        can be reused when generating the next tokens.\n *\n * @param cached   Pointer to cached token IDs.\n * @param n_cached Number of cached tokens.\n * @param prompt   Pointer to prompt token IDs.\n * @param n_prompt Number of prompt tokens.\n * @param o        Options controlling reuse behavior.\n * @"
+   }
+  },
+  "follow_up_waits_s": [
+   0.6982443332672119,
+   0.3359501361846924,
+   0.3992898464202881,
+   0.39658355712890625,
+   0.3185000419616699,
+   0.299144983291626,
+   0.2914726734161377,
+   0.2972893714904785,
+   0.313152551651001,
+   0.30512356758117676,
+   0.37895941734313965,
+   0.30574822425842285
+  ],
+  "after_restart": {
+   "first_word_s": 2.367633581161499,
+   "prompt_read": 2822,
+   "prompt_cached": 0
+  }
+ },
+ "kera": {
+  "load_seconds": 35.3244571685791,
+  "writing": {
+   "code": {
+    "first_word_s": 0.4274454116821289,
+    "words_per_s": 64.71368382264491,
+    "read_per_s": 544.6848984038244,
+    "answer": "```python\nfrom __future__ import annotations\nfrom typing import List, Tuple\n\nInterval = Tuple[int, int]  # or Tuple[float, float] if you need floats\n\n\ndef merge_intervals(intervals: List[Interval]) -> List[Interval]:\n    \"\"\"\n    Merge a list of intervals, treating touching intervals as overlapping.\n\n    The algorithm runs in O(n log n) time:\n      1. Sort intervals by their start value.\n      2. Sweep through the sorted list, merging whenever the current\n         interval's start is <= the previous interval's end.\n\n    Parameters\n    ----------\n    intervals: List[Interval]\n        A list of (start, end) pairs. Each pair must satisfy start <= end.\n\n    Returns\n    -------\n    List[Interval]\n        A new list of merged, non\u2011overlapping intervals sorted by start.\n    \"\"\"\n    if not intervals:\n        return []\n\n    # 1\ufe0f\u20e3 Sort by start (O(n log n))\n    sorted_intervals = sorted(intervals, key=lambda iv: iv[0])\n\n    merged: List[Interval] = [sorted_intervals[0]]\n\n    # 2\ufe0f\u20e3 Sweep and merge"
+   },
+   "long_context": {
+    "first_word_s": 3.4570398330688477,
+    "words_per_s": 61.38984094184545,
+    "read_per_s": 1276.6392296594915,
+    "answer": "During the evening Mr. Darcy begins as the admired, handsome guest whose fine fortune and easy manners win admiration, but as he refuses to dance with anyone beyond a few obligatory partners and reveals his haughty, condescending remarks\u2014especially when he dismisses Elizabeth as \u201ctolerable\u201d and refuses to be introduced to other women\u2014his popularity wanes and he becomes the most disliked figure in the room; afterward Mrs. Bennet tells her husband that Darcy\u2019s rudeness, particularly his slight of one of her daughters, makes him \u201ca most disagreeable, horrid man, not at all worth pleasing.\u201d"
+   },
+   "short_chat": {
+    "first_word_s": 0.2908792495727539,
+    "words_per_s": 81.19012228481496,
+    "read_per_s": 166.66176485005343,
+    "answer": "1. **Feed regularly** \u2013 Keep a consistent feeding schedule (e.g., every 12\u201324\u202fhours) using equal parts flour and water by weight.  \n2. **Maintain proper temperature** \u2013 Store it at a stable, moderate temperature (around 70\u202f\u00b0F/21\u202f\u00b0C) to encourage steady yeast activity.  \n3. **Use clean utensils and containers** \u2013 Avoid contamination by washing tools and using non\u2011metallic, breathable vessels."
+   },
+   "tool_call": {
+    "first_word_s": 0.5559320449829102,
+    "words_per_s": 66.08977157858128,
+    "read_per_s": 952.8315380637496,
+    "answer": "[{\"index\": 0, \"id\": \"gykwk7fw98j1yZScWye0GfMq99uvumb9\", \"type\": \"function\", \"function\": {\"name\": \"get_forecast\", \"arguments\": \"{\"}}][{\"index\": 0, \"function\": {\"arguments\": \"\\\"city\\\":\\\"\"}}][{\"index\": 0, \"function\": {\"arguments\": \"L\"}}][{\"index\": 0, \"function\": {\"arguments\": \"is\"}}][{\"index\": 0, \"function\": {\"arguments\": \"bon\"}}][{\"index\": 0, \"function\": {\"arguments\": \"\\\"\"}}][{\"index\": 0, \"function\": {\"arguments\": \",\\\"day\\\":\\\"\"}}][{\"index\": 0, \"function\": {\"arguments\": \"tom\"}}][{\"index\": 0, \"function\": {\"arguments\": \"orrow\"}}][{\"index\": 0, \"function\": {\"arguments\": \"\\\"\"}}][{\"index\": 0, \"function\": {\"arguments\": \",\\\"part_of_day\\\":\\\"\"}}][{\"index\": 0, \"function\": {\"arguments\": \"after\"}}][{\"index\": 0, \"function\": {\"arguments\": \"noon\"}}][{\"index\": 0, \"function\": {\"arguments\": \"\\\"\"}}][{\"index\": 0, \"function\": {\"arguments\": \",\\\"unit\\\":\\\"\"}}][{\"index\": 0, \"function\": {\"arguments\": \"c\"}}][{\"index\": 0, \"function\": {\"arguments\": \"elsius\"}}][{\"index\": 0, \"function\": {\"arguments\": \"\\\"\"}}][{\"index\": 0, \"function\": {\"arguments\": \"}\"}}]"
+   },
+   "code_rewrite": {
+    "first_word_s": 0.9415760040283203,
+    "words_per_s": 86.39469841474198,
+    "read_per_s": 1149.2968363112063,
+    "answer": "```cpp\n#include \"kvstore/kr_reuse.h\"\n\n#include <algorithm>\n#include <cmath>\n#include <unordered_map>\n\nnamespace kera {\n\nnamespace {\n\nconstexpr int      kAnchor  = 16;                    // tokens hashed to find where a passage may repeat\nconstexpr int      kCands   = 4;                     // places remembered per hash (the latest ones)\nconstexpr uint64_t kBase    = 0x100000001b3ULL;\n\nuint64_t pow_base(int k) {\n    uint64_t p = 1;\n    for (int i = 0; i < k; ++i) {\n        p *= kBase;\n    }\n    return p;\n}\n\n} // namespace\n\n/**\n * @brief Plan reuse copies based on cached and prompt token sequences.\n *        Finds repeated passages and suggests where to reuse cached data.\n */\nstd::vector<reuse_copy> plan_reuse(const int32_t * cached, int32_t n_cached, const int32_t * prompt, int32_t n_prompt,\n                                   const reuse_options & o) {\n    std::vector<reuse_copy> out;\n    const int min_len ="
+   }
+  },
+  "follow_up_waits_s": [
+   0.6368582248687744,
+   0.2779223918914795,
+   0.28846049308776855,
+   0.28940820693969727,
+   0.29905128479003906,
+   0.30572056770324707,
+   0.31851768493652344,
+   0.29789113998413086,
+   0.3029036521911621,
+   0.35332226753234863,
+   0.3201026916503906,
+   0.3057713508605957
+  ],
+  "after_restart": {
+   "first_word_s": 0.6463901996612549,
+   "prompt_read": 165,
+   "prompt_cached": 2657
+  }
+ },
+ "verdict": {
+  "against": "stock",
+  "writing_speed_ratio": 1.1571014199407303,
+  "same_answers": "2/5",
+  "restart_wait_ratio": 3.662855009872169
+ }
+}

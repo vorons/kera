@@ -1,0 +1,39 @@
+# On demand: the section 7 bench on each of the owner's machines that has a runner (amd, mac,
+# nvidia), from a finished download. Posts the before/after table as the job summary and keeps the
+# bench JSON for 90 days (spec P8). Each job runs only once its runner exists (the KERA_RUNNER_*
+# repository variables).
+name: hardware
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release to test (empty = the newest, previews included)
+        type: string
+        default: ''
+      machines:
+        description: Which machines
+        type: choice
+        options: [all, amd, mac, nvidia]
+        default: all
+
+permissions:
+  contents: read
+  actions: read
+  issues: write
+
+jobs:
+  amd:
+    if: vars.KERA_RUNNER_AMD == 'true' && (inputs.machines == 'all' || inputs.machines == 'amd')
+    uses: ./.github/workflows/bench-runner.yml
+    with: { runner: amd, label: hardware, tag: '${{ inputs.tag }}' }
+
+  mac:
+    if: vars.KERA_RUNNER_MAC == 'true' && (inputs.machines == 'all' || inputs.machines == 'mac')
+    uses: ./.github/workflows/bench-runner.yml
+    with: { runner: mac, label: hardware, tag: '${{ inputs.tag }}' }
+
+  nvidia:
+    if: vars.KERA_RUNNER_NVIDIA == 'true' && (inputs.machines == 'all' || inputs.machines == 'nvidia')
+    uses: ./.github/workflows/bench-runner.yml
+    with: { runner: nvidia, label: hardware, tag: '${{ inputs.tag }}' }

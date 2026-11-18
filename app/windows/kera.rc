@@ -1,0 +1,23 @@
+// Windows resources for kera.exe: the app icon from the logo kit (assets/brand/icons/kera.ico).
+IDI_ICON1 ICON "../../assets/brand/icons/kera.ico"
+
+1 VERSIONINFO
+FILEVERSION     0,1,0,0
+PRODUCTVERSION  0,1,0,0
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "040904B0"
+    BEGIN
+      VALUE "CompanyName",      "Kera Labs"
+      VALUE "FileDescription",  "Kera"
+      VALUE "ProductName",      "Kera"
+      VALUE "OriginalFilename", "kera.exe"
+      VALUE "LegalCopyright",   "Copyright (c) 2026 Kera Labs"
+    END
+  END
+  BLOCK "VarFileInfo"
+  BEGIN
+    VALUE "Translation", 0x409, 1200
+  END
+END

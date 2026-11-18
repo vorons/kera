@@ -1,0 +1,93 @@
+{
+ "cache_state": "warm",
+ "ceiling_tok_s": null,
+ "date": "2026-10-14T21:31:29Z",
+ "gates": {},
+ "kera": {
+  "commit": "f41ae8998970",
+  "llama_cpp": "b11619",
+  "version": "0.1.0"
+ },
+ "label": "stock llama.cpp (mmap)",
+ "load_s": 15.36,
+ "machine": {
+  "chip": "Intel(R) Xeon(R) Processor @ 2.80GHz",
+  "devices": [
+   "CPU: Intel(R) Xeon(R) Processor @ 2.80GHz"
+  ],
+  "gpu": "",
+  "os": "Ubuntu 24.04.5 LTS (kernel 6.18.44-fc-v114)",
+  "profile_hash": "96f776b3e724b649",
+  "ram_gb": 15.72
+ },
+ "model": {
+  "architecture": "nemotron_h_moe",
+  "desc": "nemotron_h_moe 31B.A3.5B Q4_0",
+  "file": "Nemotron-3-Nano-30B-A3B-Q4_0.gguf",
+  "hash": "xxh128:c61068fa1f9d70ab25dfa0be2ee5328c",
+  "n_params": 31577940288,
+  "size_gb": 18.21
+ },
+ "peak_ram_gb": 12.93,
+ "results": [
+  {
+   "accept_rate": null,
+   "decode_tok_s": 6.36,
+   "expert_hit": null,
+   "k_histogram": null,
+   "kv_hit": null,
+   "n_gen": 48,
+   "n_prompt": 35,
+   "prefetch_acc": null,
+   "prefill_tok_s": 9.29,
+   "prompt_id": "short_chat",
+   "rendered_with": "model template",
+   "runs": [
+    {
+     "decode_tok_s": 6.36,
+     "prefill_tok_s": 9.29,
+     "ttft_ms": 3770.0
+    }
+   ],
+   "ssd_gb_per_tok": null,
+   "stream": null,
+   "ttft_ms": 3770.0
+  }
+ ],
+ "runs": 1,
+ "schema": "kera-bench-1",
+ "settings": {
+  "engine": {
+   "flash_attn": "auto",
+   "load_mode": "mmap",
+   "n_batch": 2048,
+   "n_ctx": 256,
+   "n_gpu_layers": -1,
+   "n_threads": 4,
+   "n_ubatch": 512,
+   "repack": 0,
+   "sampling": "greedy",
+   "thinking": "default",
+   "type_k": "f16",
+   "type_v": "f16"
+  },
+  "kera": {
+   "io.read_size_mib": 0.0,
+   "io.reader_threads": 0.0,
+   "kv.disk_budget_gb": 20.0,
+   "kv.store": 1.0,
+   "setup.ram_test_mib": 1024.0,
+   "setup.ssd_cell_seconds": 0.8,
+   "setup.ssd_confirm_seconds": 3.0,
+   "setup.ssd_test_gb": 2.0,
+   "spec.controller": 1.0
+  },
+  "stream": {
+   "budget_gb": null,
+   "expert_gb": null,
+   "io_threads": 8,
+   "lookahead": true,
+   "mode": "off"
+  }
+ }
+}
