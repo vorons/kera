@@ -952,8 +952,11 @@ struct LLM_TN_IMPL {
     const char * const suffix;
     const int bid;
     const int xid;
+    std::string raw_name; // [Kera] full name of a tensor without an llm_tensor enum
 
     LLM_TN_IMPL(llm_arch arch, llm_tensor tensor, const char * suffix, int bid, int xid);
+    // [Kera] Clover GGUFs from other converters keep tensors that llama.cpp's own converter drops (PR #31306)
+    LLM_TN_IMPL(const std::string & raw, int bid);
 
     std::string str() const;
 

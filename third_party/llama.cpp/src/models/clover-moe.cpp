@@ -7,8 +7,12 @@ void llama_model_clover_moe::load_arch_hparams(llama_model_loader & ml) {
     }
 
     ml.get_key_or_arr(LLM_KV_EXPERT_FEED_FORWARD_LENGTH, hparams.n_ff_exp_arr, hparams.n_layer_all);
-    ml.get_key(LLM_KV_EXPERT_SHARED_COUNT, hparams.n_expert_shared);
-    if (hparams.n_expert_shared > 0) {
+    // [Kera] PR #31306's converter writes expert_shared_count (default 1); older/third-party GGUFs don't
+    const bool has_shexp_ff = ml.get_key(LLM_KV_EXPERT_SHARED_FEED_FORWARD_LENGTH, hparams.n_ff_shexp, false);
+    if (!ml.get_key(LLM_KV_EXPERT_SHARED_COUNT, hparams.n_expert_shared, false) && has_shexp_ff) {
+        hparams.n_expert_shared = 1;
+    }
+    if (hparams.n_expert_shared > 0 && !has_shexp_ff) {
         ml.get_key(LLM_KV_EXPERT_SHARED_FEED_FORWARD_LENGTH, hparams.n_ff_shexp);
     }
     ml.get_key(LLM_KV_ATTENTION_LAYERNORM_RMS_EPS,       hparams.f_norm_rms_eps);
@@ -97,6 +101,15 @@ void llama_model_clover_moe::load_arch_tensors(llama_model_loader &) {
             layer.ssm_alpha  = create_tensor(tn(LLM_TENSOR_SSM_ALPHA,    "weight", il), { n_embd, n_v_heads }, 0);
             layer.ssm_norm   = create_tensor(tn(LLM_TENSOR_SSM_NORM,     "weight", il), { head_v_dim }, 0);
             layer.ssm_out    = create_tensor(tn(LLM_TENSOR_SSM_OUT,      "weight", il), { value_dim, n_embd }, 0);
+        }
+
+        if (hparams.is_recr(il)) {
+            // [Kera] the converter in PR #31306 filters these out; skip them here for GGUFs that kept them
+            const std::string pre = "blk." + std::to_string(il) + ".";
+            create_tensor(LLM_TN_IMPL(pre + "ssm_bd_history.weight", il),      { 32 }, TENSOR_SKIP);
+            create_tensor(LLM_TN_IMPL(pre + "ssm_bd_history.bias", il),        { 32 }, TENSOR_SKIP);
+            create_tensor(LLM_TN_IMPL(pre + "ssm_bd_logit_scale.weight", il),  { 32 }, TENSOR_SKIP);
+            create_tensor(LLM_TN_IMPL(pre + "ssm_conv1d.weight_right", il),    { 3, 8192 }, TENSOR_SKIP);
         }
 
         layer.ffn_gate_inp  = create_tensor(tn(LLM_TENSOR_FFN_GATE_INP,  "weight", il), { n_embd, n_expert }, 0);

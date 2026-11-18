@@ -1334,10 +1334,16 @@ std::string LLM_KV::operator()(llm_kv kv) const {
     return name;
 }
 
+LLM_TN_IMPL::LLM_TN_IMPL(const std::string & raw, int bid_)
+        : arch(LLM_ARCH_CLOVER_MOE), tensor(LLM_TENSOR_SSM_CONV1D), suffix(nullptr), bid(bid_), xid(-1), raw_name(raw) {}
+
 LLM_TN_IMPL::LLM_TN_IMPL(llm_arch arch, llm_tensor tensor, const char * suffix, int bid, int xid)
     : arch(arch), tensor(tensor), suffix(suffix), bid(bid), xid(xid) {}
 
 std::string LLM_TN_IMPL::str() const {
+    if (!raw_name.empty()) {
+        return raw_name;
+    }
     if (LLM_TENSOR_NAMES.find(tensor) == LLM_TENSOR_NAMES.end()) {
         GGML_ABORT("unknown tensor name for tensor id %d", static_cast<int>(tensor));
     }

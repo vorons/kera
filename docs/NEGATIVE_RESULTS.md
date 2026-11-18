@@ -6,7 +6,7 @@ nobody repeats it (ground rule 1). Newest first.
 Each entry: the date, what was tried, on which machine and model, the numbers,
 why it failed (if known), and what was decided.
 
-## N-020: Clover-35B-A3B-Preview is a newer model than llama.cpp understands (2026-11-18)
+## N-020: Clover-35B-A3B-Preview GGUF from another converter (2026-11-18; loading fixed)
 
 **Tried.** `kera serve -m Clover-35B-A3B-Preview-Q4_0.gguf --stream kera --stream-budget-gb 3000` on this Linux
 computer, with llama.cpp b12500 (the engine in 0.1.5.3).
@@ -23,8 +23,16 @@ current llama.cpp master names: `ssm_bd_history.weight`, `ssm_bd_history.bias`, 
 loader to ignore the extra tensors would make the model run, but on a different computation than the file
 describes, which rule one forbids.
 
-**Decided.** No loader patch: this file needs a converter that exports it as the Clover variant llama.cpp
-supports, or a llama.cpp that implements the four extra tensors. The local fallback patch was reverted.
+**Resolved the same day.** Upstream PR #31306 (merged 2 Nov 2026, already in b12500) is the Clover support.
+Its converter (`conversion/clover.py`) writes `expert_shared_count` with a default of 1 and *filters out* exactly
+those four tensor suffixes before writing the GGUF. This file was converted by something else that kept them.
+Kera now applies the converter's two decisions when loading: default the shared-expert count to 1 when the shared
+FFN length is present, and skip those four tensors per linear-attention layer with `TENSOR_SKIP`. The result is
+the same weight set the official converter would have written, so no model maths is invented. The first partial
+fallback was reverted in favour of this complete fix. **Verified:** the 19 GB model loads and the server starts
+and listens on this CPU. A generation request was not completed: this machine has 15 GB RAM and the file asks for
+four slots of 131072 context, so the test process was killed by the OOM killer. Run it on the owner's larger
+machine with a small `-np`/`-c` before calling generation verified.
 
 ## N-019: On the CPU, an 8-bit file's own numbers depend on how many words are computed at once (2026-11-10)
 
