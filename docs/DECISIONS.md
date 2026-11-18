@@ -619,7 +619,8 @@ Apache 2.0, by Kera Labs).
   the notices kept. Third-party code keeps its own licences (`NOTICE`).
 - **The source is a snapshot, not the git history:** an old commit holds a path with the owner's Mac user name
   (waiting for the owner, the git-history item), so the history isn't published.
-- **The GitHub repo stays private** (D-004): only the Hugging Face copy is public.
+- **The GitHub repo was private when this was decided** (D-004): only the Hugging Face copy was public then.
+  **Superseded on 18 Nov 2026:** the owner made the GitHub fork public and cancelled D-004.
 - **Model weights are never published** with Kera; each model keeps its own licence.
 
 ## D-025: The owner's MacBook for a Kera-vs-Ollama test app (2026-10-29)
@@ -1050,7 +1051,8 @@ Decided by the agent, after building M5's store and measuring it in the cloud.
 
 Decided by the agent, following P8 ("keeping the minutes down") and the owner's "no plan changes".
 
-- The repo is private, so GitHub's own machines draw on the free monthly allowance: 2,000 minutes on GitHub Free. Windows minutes count about double and Mac minutes about ten times *(verify on GitHub's billing page; GitHub has changed these before)*. The spec's plan of running Windows on every change and the Mac nightly assumed free runners on the owner's machines. The owner chose not to have those (D-002).
+- **Changed on 18 Nov 2026:** the GitHub fork is public, so the 2,000-minute cap below no longer applies to it.
+  At the time, the repo was private, so GitHub's own machines drew on the free monthly allowance: 2,000 minutes on GitHub Free. Windows minutes count about double and Mac minutes about ten times *(verify on GitHub's billing page; GitHub has changed these before)*. The spec's plan of running Windows on every change and the Mac nightly assumed free runners on the owner's machines. The owner chose not to have those (D-002).
 - **Every code push:** the Linux build, unit tests, reference-code tests, an app smoke test and the web page's type check (`ci.yml`). Docs-only pushes run nothing.
 - **Windows build and download:** on every release tag, and on pushes whose commit message contains `[win]` (`build-windows.yml`).
 - **Mac build and download:** on full milestone releases, on demand (`mac.yml`), and on pushes marked `[mac]`. It never runs on a schedule on GitHub's machines.
@@ -1151,7 +1153,10 @@ Decided by the agent, to carry out D-002.
   (`scripts/ollama-private.ps1`), because loading a model in the machine's own
   Ollama pushes out the model the apps use.
 
-## D-004: Nothing is pushed while the repo is public (2026-10-14)
+## D-004: Nothing is pushed while the repo is public (2026-10-14; cancelled 18 Nov 2026)
+
+**Cancelled by the owner on 18 Nov 2026.** Kera now lives in a public GitHub fork, so pushing to it is allowed.
+The text below is kept as history only and no longer applies.
 
 Decided by the agent, following the owner's "never make it public".
 
@@ -1169,7 +1174,7 @@ reads first.
 
 - Allowed: download models (keep 100 GB free, stay inside the Kera folder,
   never move or delete the owner's own models); install the GitHub runner
-  labelled `amd` while the repo is private; benchmark any time, closing other
+  labelled `amd` while the repo was private (it is public now, so no runners: P8); benchmark any time, closing other
   AI apps and reopening them afterwards; merge your own pull requests once the
   checks are green and the gate passed.
 - Lossy modes stay off by default.

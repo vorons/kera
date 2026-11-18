@@ -8,7 +8,8 @@ Kera is a local AI engine and downloadable app built on llama.cpp. The full plan
 1. Start by reading `docs/STATUS.md`. It says where the last session stopped.
 2. Read the spec's "Owner decisions" section, section 0 (ground rules) and the build playbook (P1–P8)
    before writing code. Follow P4's "Needs" column. Never skip a gate.
-3. Check the repo is private before every push. Never push while it is public (D-004).
+3. The GitHub fork is public by the owner's decision (18 Nov 2026; D-004 was cancelled). Push to it when
+   asked; no visibility check is needed.
 
 ## The owner's rules (details in `docs/DECISIONS.md`, D-001 to D-010, D-033, D-034 and D-038)
 

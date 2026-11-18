@@ -23,13 +23,13 @@ The owner made these changes after writing the spec. Where they disagree with th
 4. **Don't stop.** If a gate fails twice, or a milestone takes more than twice its size, log it in `docs/NEGATIVE_RESULTS.md`, write the options in `docs/STATUS.md`, and move on to milestones that don't depend on it. This replaces the "stop and report" rules in P1.
 5. **Permissions granted** (exceptions to ground rule 3):
     - download any model needed, as long as at least 100 GB stays free on the Minisforum's disk; keep downloads inside the Kera folder and delete them when no longer needed; use the owner's existing models where they are, and never move or delete them;
-    - install the GitHub runner on the Minisforum as a Windows service labelled `amd`, as long as the repo is private;
+    - install the GitHub runner on the Minisforum as a Windows service labelled `amd`, while the repo is private (it is public now, so this permission is withdrawn);
     - run benchmarks whenever needed, closing other AI apps on the Minisforum meanwhile and reopening them afterwards;
     - merge the agent's own work once the checks are green and the gate passed.
 6. **Never, and don't ask either:** anything needing admin rights after the first setup; buying or renting anything; payment methods or plan changes; adding people to the repo; BIOS, driver or Windows changes; deleting anything outside the Kera folder; anything on hardware that isn't the Minisforum (the Mac, NVIDIA, a DGX Spark). Skip these and list them in `docs/STATUS.md` under "Waiting for the owner".
 7. **Serving several people at once is a goal (17 Oct 2026).** The owner asked for vLLM's benefits for serving several people at once, so the non-goal "Serving many users at once" and the first item of 12.4 no longer hold. Each piece is still a setting that stays off until its gate passes (`docs/DECISIONS.md` D-023).
 8. **The MacBook for a test app (29 Oct 2026).** The owner asked for their 128 GB MacBook Pro to be used, with a small Mac app that races Kera against Ollama live (`docs/DECISIONS.md` D-025). For that MacBook this replaces "anything on hardware that isn't the Minisforum" in item 6.
-9. **Published on Hugging Face, open source (4 Nov 2026).** The owner chose to publish Kera publicly on Hugging Face, downloads and source, under the Apache License 2.0 by Kera Labs (`docs/DECISIONS.md` D-026). The GitHub repo stays private.
+9. **Published on Hugging Face, open source (4 Nov 2026).** The owner chose to publish Kera publicly on Hugging Face, downloads and source, under the Apache License 2.0 by Kera Labs (`docs/DECISIONS.md` D-026). The GitHub repo was private then; the owner made the fork public on 18 Nov 2026 and cancelled D-004.
 10. **Image models (7 Nov 2026).** The owner asked for version 0.1.1 to run image models, both those that see images (vision chat) and those that make them (text to image), with faster model loading and a full bug sweep (`docs/DECISIONS.md` D-027). Making images adds a second engine, stable-diffusion.cpp, beside llama.cpp.
 11. **Speed only, never quality (9 Nov 2026).** Rule number one: Kera never changes how a model responds; it only makes things faster (`docs/DECISIONS.md` D-033). A model runs with its own template and its own card's settings, thinks as it does in a chat, and answers in full; seeds stay random where the engine leaves them random. Kera has no mode, option or setting that trades quality for speed, not even an opt-in one (D-034). This drops Phase 11's lossy modes, M12's lossy work (S7 "lossy turbo" in the M9 table, the 8-bit chat memory, cached-expert routing, passage reuse, QuantSpec) and every "lossy mode" mentioned below; where this spec says a trick may run as a lossy mode, it is not built. The engines' own command-line options still pass through as in the stock engines, but Kera neither adds nor suggests any that lower quality.
 
@@ -45,7 +45,7 @@ The owner made these changes after writing the spec. Where they disagree with th
     - rent or buy anything;
     - delete files outside the repo;
     - change BIOS, driver or OS settings;
-    - make the GitHub repo public, add people to it, add a payment method or change its plan;
+    - add people to the repo, add a payment method or change its plan;
     - install a GitHub runner on one of his machines (P8).
 4. **Don't reinvent what exists.** Writing fast GPU kernels for Apple, AMD and NVIDIA from scratch takes years. Build on an existing engine (section 3) and spend your effort on the parts nobody has built.
 5. **Verify platform facts.** Anything marked *(verify)* comes from research that may be out of date. Check the current docs or source before relying on it, and note what you found in `docs/DECISIONS.md`.
@@ -332,7 +332,7 @@ GitHub's runner app lets a pull request run on the owner's real hardware. That i
 
 - Each passed milestone gets a version tag, and `release.yml` attaches the Mac, Windows and Linux downloads to a GitHub Release.
 - The owner downloads from the repo's Releases page while signed in.
-- **Before anyone else gets it** (friends, testers, buyers), ask the owner where public downloads should live. One option is a separate public repo that holds only the release files. The code stays private either way.
+- **Before anyone else gets it** (friends, testers, buyers), ask the owner where public downloads should live. One option is a separate public repo that holds only the release files. The code now lives in the public GitHub fork (18 Nov 2026).
 - **Mac signing:** when the owner has an Apple Developer account, add the certificate and notarisation password as GitHub encrypted secrets, used only by `release.yml`.
 
 ---
