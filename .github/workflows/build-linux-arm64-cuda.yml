@@ -1,120 +1,132 @@
-# Linux ARM64 download with NVIDIA's CUDA, for the DGX Spark and other GB10 machines (D-029). Called by release.yml
-# for full releases and by ci.yml for a commit marked [spark].
+# DISABLED 2026-11-18: this fork is checked only on Linux. Windows, macOS, Spark, ROCm and
+# self-hosted-hardware jobs are commented out until that hardware exists to verify them.
+# # Linux ARM64 download with NVIDIA's CUDA, for the DGX Spark and other GB10 machines (D-029). Called by release.yml
+# # for full releases and by ci.yml for a commit marked [spark].
+# #
+# # Built on GitHub's ARM machines in NVIDIA's CUDA 13.0 image: CUDA 13.0 is the oldest CUDA the GB10 ships with
+# # (DGX OS 7), and a program built with it runs on any CUDA 13 driver. Only the GB10's chip is compiled (sm_121a);
+# # the CPU code comes in one copy per ARM generation, the best picked when it starts. The CUDA libraries (cudart,
+# # cuBLAS) are DGX OS's own, so the download stays small; without them Kera runs on the CPU and says so.
+# # There is no graphics chip here: the build is checked, and the tests run on the CPU.
+# # GCC 14, not Ubuntu 24.04's GCC 13: ggml's CPU variant for the newest ARM chips (armv9.2 with SME) needs it.
+# # The image engine is built without NVIDIA's CUTLASS (faster 8-bit maths), to be measured on a Spark first.
+# name: build-linux-arm64-cuda
 #
-# Built on GitHub's ARM machines in NVIDIA's CUDA 13.0 image: CUDA 13.0 is the oldest CUDA the GB10 ships with
-# (DGX OS 7), and a program built with it runs on any CUDA 13 driver. Only the GB10's chip is compiled (sm_121a);
-# the CPU code comes in one copy per ARM generation, the best picked when it starts. The CUDA libraries (cudart,
-# cuBLAS) are DGX OS's own, so the download stays small; without them Kera runs on the CPU and says so.
-# There is no graphics chip here: the build is checked, and the tests run on the CPU.
-# GCC 14, not Ubuntu 24.04's GCC 13: ggml's CPU variant for the newest ARM chips (armv9.2 with SME) needs it.
-# The image engine is built without NVIDIA's CUTLASS (faster 8-bit maths), to be measured on a Spark first.
+# on:
+#   workflow_call:
+#     inputs:
+#       version:
+#         type: string
+#         default: dev
+#       package:
+#         type: boolean
+#         default: false
+#
+# permissions:
+#   contents: read
+#
+# jobs:
+#   spark:
+#     runs-on: ubuntu-24.04-arm
+#     container: nvidia/cuda:13.0.3-devel-ubuntu24.04
+#     timeout-minutes: 240
+#     steps:
+#       - uses: actions/checkout@v6
+#
+#       - name: Install tools
+#         env:
+#           DEBIAN_FRONTEND: noninteractive
+#         run: |
+#           apt-get update
+#           apt-get install -y cmake build-essential gcc-14 g++-14 ninja-build git ccache python3 file
+#
+#       - name: ccache
+#         uses: ggml-org/ccache-action@v1.2.24
+#         with:
+#           key: kera-linux-arm64-cuda
+#           evict-old-files: 8d
+#
+#       - name: Build
+#         run: |
+#           # GCC 14: the CPU variant for the newest ARM chips needs +sme, which Ubuntu 24.04's GCC 13 doesn't know
+#           cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+#             -DCMAKE_C_COMPILER=gcc-14 -DCMAKE_CXX_COMPILER=g++-14 -DCMAKE_CUDA_HOST_COMPILER=g++-14 \
+#             -DBUILD_SHARED_LIBS=ON -DGGML_NATIVE=OFF -DGGML_BACKEND_DL=ON -DGGML_CPU_ALL_VARIANTS=ON \
+#             -DGGML_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES=121a-real -DGGML_CUDA_CCCL_VERSION=v3.4.3 \
+#             -DCMAKE_EXE_LINKER_FLAGS=-Wl,--allow-shlib-undefined \
+#             -DLLAMA_OPENSSL=OFF -DKERA_WARNINGS_AS_ERRORS=ON
+#           cmake --build build -j "$(nproc)"
+#
+#       # the CPU code on ARM: the unit tests (the CUDA part can't load without a driver, and isn't asked to)
+#       - name: Unit tests
+#         run: ctest --test-dir build --output-on-failure
+#
+#       - name: Check the parts
+#         run: |
+#           file build/bin/kera
+#           ls build/bin/*.so* build/bin/image build/bin/music build/bin/3d build/bin/sfx
+#           test -f build/bin/libggml-cuda.so
+#           test -f build/bin/image/libggml-cuda.so
+#           test -f build/bin/music/libggml-cuda.so
+#           test -f build/bin/3d/libggml-cuda.so
+#           test -f build/bin/sfx/libggml-cuda.so
+#           # the CUDA libraries are found in NVIDIA's folder even when it isn't on the system's library path (the 3D
+#           # program links CUDA's runtime itself, for its own kernels)
+#           for f in build/bin/libggml-cuda.so build/bin/image/libggml-cuda.so build/bin/music/libggml-cuda.so \
+#                    build/bin/3d/libggml-cuda.so build/bin/3d/trellis-cli build/bin/sfx/libggml-cuda.so; do
+#             readelf -d "$f" | grep -i runpath
+#             readelf -d "$f" | grep -q /usr/local/cuda/lib64
+#           done
+#           ./build/bin/kera version
+#           ./build/bin/kera setup --quick --no-disk --json > /dev/null
+#
+#       - name: Package
+#         if: ${{ inputs.package }}
+#         run: |
+#           name=kera-${{ inputs.version }}-linux-arm64-cuda
+#           # The engines (image, music, 3D, sound effects) link the CUDA driver (libcuda.so.1) or load it as they start,
+#           # and this machine has no driver: their --help checks below run against NVIDIA's stand-in library, which is
+#           # never shipped.
+#           mkdir -p "$RUNNER_TEMP/cuda-stub"
+#           ln -sf /usr/local/cuda/lib64/stubs/libcuda.so "$RUNNER_TEMP/cuda-stub/libcuda.so.1"
+#           stub="$RUNNER_TEMP/cuda-stub"
+#           mkdir -p "$RUNNER_TEMP/$name"
+#           cp build/bin/kera build/bin/*.so* "$RUNNER_TEMP/$name/"
+#           # the image and music engines (D-027, D-028), each with its own ggml and its CUDA part
+#           mkdir -p "$RUNNER_TEMP/$name/image" "$RUNNER_TEMP/$name/music"
+#           cp build/bin/image/sd-cli build/bin/image/sd-server "$RUNNER_TEMP/$name/image/"
+#           cp -P build/bin/image/libstable-diffusion.so build/bin/image/libggml* "$RUNNER_TEMP/$name/image/"
+#           LD_LIBRARY_PATH="$stub" "$RUNNER_TEMP/$name/image/sd-cli" --help > /dev/null
+#           cp build/bin/music/ace-lm build/bin/music/ace-synth build/bin/music/ace-server "$RUNNER_TEMP/$name/music/"
+#           cp -P build/bin/music/libggml* "$RUNNER_TEMP/$name/music/"
+#           LD_LIBRARY_PATH="$stub" "$RUNNER_TEMP/$name/music/ace-synth" --help 2>&1 | grep -q "Usage:"
+#           # the 3D and sound-effect engines (D-031), the same way
+#           mkdir -p "$RUNNER_TEMP/$name/3d" "$RUNNER_TEMP/$name/sfx"
+#           cp build/bin/3d/trellis-cli "$RUNNER_TEMP/$name/3d/"
+#           cp -P build/bin/3d/libggml* "$RUNNER_TEMP/$name/3d/"
+#           LD_LIBRARY_PATH="$stub" "$RUNNER_TEMP/$name/3d/trellis-cli" --help 2>&1 | grep -q "usage:"
+#           cp build/bin/sfx/audiocpp_cli build/bin/sfx/audiocpp_server "$RUNNER_TEMP/$name/sfx/"
+#           cp -P build/bin/sfx/libggml* "$RUNNER_TEMP/$name/sfx/"
+#           LD_LIBRARY_PATH="$stub" "$RUNNER_TEMP/$name/sfx/audiocpp_cli" --help 2>&1 | grep -q -- "--task"
+#           cp packaging/linux/README-spark.txt "$RUNNER_TEMP/$name/README.txt"
+#           cp LICENSE NOTICE build/generated/THIRD_PARTY_LICENSES.txt "$RUNNER_TEMP/$name/"
+#           python3 packaging/copy_finetune.py "$RUNNER_TEMP/$name"
+#           tar -C "$RUNNER_TEMP" -czf "$name.tar.gz" "$name"
+#           ls -la "$RUNNER_TEMP/$name"
+#
+#       - uses: actions/upload-artifact@v7
+#         if: ${{ inputs.package }}
+#         with:
+#           name: kera-linux-arm64-cuda
+#           path: kera-${{ inputs.version }}-linux-arm64-cuda.tar.gz
+#           retention-days: 3
+
 name: build-linux-arm64-cuda
-
 on:
-  workflow_call:
-    inputs:
-      version:
-        type: string
-        default: dev
-      package:
-        type: boolean
-        default: false
-
-permissions:
-  contents: read
-
+  workflow_dispatch:
 jobs:
-  spark:
-    runs-on: ubuntu-24.04-arm
-    container: nvidia/cuda:13.0.3-devel-ubuntu24.04
-    timeout-minutes: 240
+  disabled:
+    if: false
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v6
-
-      - name: Install tools
-        env:
-          DEBIAN_FRONTEND: noninteractive
-        run: |
-          apt-get update
-          apt-get install -y cmake build-essential gcc-14 g++-14 ninja-build git ccache python3 file
-
-      - name: ccache
-        uses: ggml-org/ccache-action@v1.2.24
-        with:
-          key: kera-linux-arm64-cuda
-          evict-old-files: 8d
-
-      - name: Build
-        run: |
-          # GCC 14: the CPU variant for the newest ARM chips needs +sme, which Ubuntu 24.04's GCC 13 doesn't know
-          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_C_COMPILER=gcc-14 -DCMAKE_CXX_COMPILER=g++-14 -DCMAKE_CUDA_HOST_COMPILER=g++-14 \
-            -DBUILD_SHARED_LIBS=ON -DGGML_NATIVE=OFF -DGGML_BACKEND_DL=ON -DGGML_CPU_ALL_VARIANTS=ON \
-            -DGGML_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES=121a-real -DGGML_CUDA_CCCL_VERSION=v3.4.3 \
-            -DCMAKE_EXE_LINKER_FLAGS=-Wl,--allow-shlib-undefined \
-            -DLLAMA_OPENSSL=OFF -DKERA_WARNINGS_AS_ERRORS=ON
-          cmake --build build -j "$(nproc)"
-
-      # the CPU code on ARM: the unit tests (the CUDA part can't load without a driver, and isn't asked to)
-      - name: Unit tests
-        run: ctest --test-dir build --output-on-failure
-
-      - name: Check the parts
-        run: |
-          file build/bin/kera
-          ls build/bin/*.so* build/bin/image build/bin/music build/bin/3d build/bin/sfx
-          test -f build/bin/libggml-cuda.so
-          test -f build/bin/image/libggml-cuda.so
-          test -f build/bin/music/libggml-cuda.so
-          test -f build/bin/3d/libggml-cuda.so
-          test -f build/bin/sfx/libggml-cuda.so
-          # the CUDA libraries are found in NVIDIA's folder even when it isn't on the system's library path (the 3D
-          # program links CUDA's runtime itself, for its own kernels)
-          for f in build/bin/libggml-cuda.so build/bin/image/libggml-cuda.so build/bin/music/libggml-cuda.so \
-                   build/bin/3d/libggml-cuda.so build/bin/3d/trellis-cli build/bin/sfx/libggml-cuda.so; do
-            readelf -d "$f" | grep -i runpath
-            readelf -d "$f" | grep -q /usr/local/cuda/lib64
-          done
-          ./build/bin/kera version
-          ./build/bin/kera setup --quick --no-disk --json > /dev/null
-
-      - name: Package
-        if: ${{ inputs.package }}
-        run: |
-          name=kera-${{ inputs.version }}-linux-arm64-cuda
-          # The engines (image, music, 3D, sound effects) link the CUDA driver (libcuda.so.1) or load it as they start,
-          # and this machine has no driver: their --help checks below run against NVIDIA's stand-in library, which is
-          # never shipped.
-          mkdir -p "$RUNNER_TEMP/cuda-stub"
-          ln -sf /usr/local/cuda/lib64/stubs/libcuda.so "$RUNNER_TEMP/cuda-stub/libcuda.so.1"
-          stub="$RUNNER_TEMP/cuda-stub"
-          mkdir -p "$RUNNER_TEMP/$name"
-          cp build/bin/kera build/bin/*.so* "$RUNNER_TEMP/$name/"
-          # the image and music engines (D-027, D-028), each with its own ggml and its CUDA part
-          mkdir -p "$RUNNER_TEMP/$name/image" "$RUNNER_TEMP/$name/music"
-          cp build/bin/image/sd-cli build/bin/image/sd-server "$RUNNER_TEMP/$name/image/"
-          cp -P build/bin/image/libstable-diffusion.so build/bin/image/libggml* "$RUNNER_TEMP/$name/image/"
-          LD_LIBRARY_PATH="$stub" "$RUNNER_TEMP/$name/image/sd-cli" --help > /dev/null
-          cp build/bin/music/ace-lm build/bin/music/ace-synth build/bin/music/ace-server "$RUNNER_TEMP/$name/music/"
-          cp -P build/bin/music/libggml* "$RUNNER_TEMP/$name/music/"
-          LD_LIBRARY_PATH="$stub" "$RUNNER_TEMP/$name/music/ace-synth" --help 2>&1 | grep -q "Usage:"
-          # the 3D and sound-effect engines (D-031), the same way
-          mkdir -p "$RUNNER_TEMP/$name/3d" "$RUNNER_TEMP/$name/sfx"
-          cp build/bin/3d/trellis-cli "$RUNNER_TEMP/$name/3d/"
-          cp -P build/bin/3d/libggml* "$RUNNER_TEMP/$name/3d/"
-          LD_LIBRARY_PATH="$stub" "$RUNNER_TEMP/$name/3d/trellis-cli" --help 2>&1 | grep -q "usage:"
-          cp build/bin/sfx/audiocpp_cli build/bin/sfx/audiocpp_server "$RUNNER_TEMP/$name/sfx/"
-          cp -P build/bin/sfx/libggml* "$RUNNER_TEMP/$name/sfx/"
-          LD_LIBRARY_PATH="$stub" "$RUNNER_TEMP/$name/sfx/audiocpp_cli" --help 2>&1 | grep -q -- "--task"
-          cp packaging/linux/README-spark.txt "$RUNNER_TEMP/$name/README.txt"
-          cp LICENSE NOTICE build/generated/THIRD_PARTY_LICENSES.txt "$RUNNER_TEMP/$name/"
-          python3 packaging/copy_finetune.py "$RUNNER_TEMP/$name"
-          tar -C "$RUNNER_TEMP" -czf "$name.tar.gz" "$name"
-          ls -la "$RUNNER_TEMP/$name"
-
-      - uses: actions/upload-artifact@v7
-        if: ${{ inputs.package }}
-        with:
-          name: kera-linux-arm64-cuda
-          path: kera-${{ inputs.version }}-linux-arm64-cuda.tar.gz
-          retention-days: 3
+      - run: echo "This workflow is disabled - no non-Linux hardware to verify."

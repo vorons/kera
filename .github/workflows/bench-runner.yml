@@ -1,102 +1,114 @@
-# The section 7 bench on one of the owner's machines (a self-hosted runner labelled amd, mac or nvidia),
-# run from a finished download as the owner asked (D-002), then compared with the last results from
-# that machine. Called by nightly.yml and hardware.yml.
+# DISABLED 2026-11-18: this fork is checked only on Linux. Windows, macOS, Spark, ROCm and
+# self-hosted-hardware jobs are commented out until that hardware exists to verify them.
+# # The section 7 bench on one of the owner's machines (a self-hosted runner labelled amd, mac or nvidia),
+# # run from a finished download as the owner asked (D-002), then compared with the last results from
+# # that machine. Called by nightly.yml and hardware.yml.
+# name: bench-runner
+#
+# on:
+#   workflow_call:
+#     inputs:
+#       runner:
+#         description: Runner label (amd, mac or nvidia)
+#         type: string
+#         required: true
+#       label:
+#         description: nightly or hardware
+#         type: string
+#         required: true
+#       tag:
+#         description: Release to test (default the newest, previews included)
+#         type: string
+#         default: ''
+#       open_issue:
+#         description: Open a bug issue if anything got more than 3% slower
+#         type: boolean
+#         default: false
+#
+# permissions:
+#   contents: read
+#   actions: read
+#   issues: write
+#
+# jobs:
+#   bench:
+#     runs-on: [self-hosted, '${{ inputs.runner }}']
+#     timeout-minutes: 240
+#     steps:
+#       - uses: actions/checkout@v6
+#         with:
+#           sparse-checkout: scripts
+#
+#       - name: Bench (Windows)
+#         if: runner.os == 'Windows'
+#         shell: powershell
+#         env:
+#           GH_TOKEN: ${{ github.token }}
+#           KERA_BENCH_MODELS: ${{ vars[format('KERA_BENCH_MODELS_{0}', inputs.runner)] }}
+#         run: .\scripts\bench-runner.ps1 -Out bench-out -Tag "${{ inputs.tag }}" -Label "${{ inputs.label }}"
+#
+#       - name: Bench (Mac or Linux)
+#         if: runner.os != 'Windows'
+#         env:
+#           GH_TOKEN: ${{ github.token }}
+#           KERA_BENCH_MODELS: ${{ vars[format('KERA_BENCH_MODELS_{0}', inputs.runner)] }}
+#         run: bash scripts/bench-runner.sh bench-out "${{ inputs.tag }}" "${{ inputs.label }}"
+#
+#       - uses: actions/upload-artifact@v7
+#         with:
+#           name: bench-${{ inputs.runner }}
+#           path: bench-out/*.json
+#           retention-days: 90
+#
+#   compare:
+#     needs: bench
+#     runs-on: ubuntu-24.04
+#     steps:
+#       - uses: actions/checkout@v6
+#
+#       - uses: actions/download-artifact@v8
+#         with:
+#           name: bench-${{ inputs.runner }}
+#           path: after
+#
+#       # the previous successful run of the bench on this machine, from either workflow
+#       - name: Last results from this machine
+#         env:
+#           GH_TOKEN: ${{ github.token }}
+#         run: |
+#           mkdir -p before
+#           for wf in nightly.yml hardware.yml; do
+#             gh run list -R "$GITHUB_REPOSITORY" --workflow "$wf" --status success --limit 20 --json databaseId,createdAt \
+#               --jq '.[] | "\(.createdAt) \(.databaseId)"'
+#           done | sort -r | while read -r _ id; do
+#             [ "$id" = "$GITHUB_RUN_ID" ] && continue
+#             if gh run download "$id" -R "$GITHUB_REPOSITORY" -n "bench-${{ inputs.runner }}" -D before 2>/dev/null; then
+#               echo "Comparing with run $id"
+#               break
+#             fi
+#           done
+#
+#       - name: Compare
+#         id: compare
+#         run: |
+#           echo "## Bench on the ${{ inputs.runner }} machine (${{ inputs.label }})" >> "$GITHUB_STEP_SUMMARY"
+#           python3 bench/compare.py before after --summary "$GITHUB_STEP_SUMMARY"
+#
+#       - name: Open an issue
+#         if: failure() && steps.compare.outcome == 'failure' && inputs.open_issue
+#         env:
+#           GH_TOKEN: ${{ github.token }}
+#         run: |
+#           gh issue create -R "$GITHUB_REPOSITORY" --label bug --label speed --label "${{ inputs.runner }}" \
+#             --title "Nightly bench: slower on the ${{ inputs.runner }} machine" \
+#             --body "The nightly bench found a model more than 3% slower than the last run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+
 name: bench-runner
-
 on:
-  workflow_call:
-    inputs:
-      runner:
-        description: Runner label (amd, mac or nvidia)
-        type: string
-        required: true
-      label:
-        description: nightly or hardware
-        type: string
-        required: true
-      tag:
-        description: Release to test (default the newest, previews included)
-        type: string
-        default: ''
-      open_issue:
-        description: Open a bug issue if anything got more than 3% slower
-        type: boolean
-        default: false
-
-permissions:
-  contents: read
-  actions: read
-  issues: write
-
+  workflow_dispatch:
 jobs:
-  bench:
-    runs-on: [self-hosted, '${{ inputs.runner }}']
-    timeout-minutes: 240
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          sparse-checkout: scripts
-
-      - name: Bench (Windows)
-        if: runner.os == 'Windows'
-        shell: powershell
-        env:
-          GH_TOKEN: ${{ github.token }}
-          KERA_BENCH_MODELS: ${{ vars[format('KERA_BENCH_MODELS_{0}', inputs.runner)] }}
-        run: .\scripts\bench-runner.ps1 -Out bench-out -Tag "${{ inputs.tag }}" -Label "${{ inputs.label }}"
-
-      - name: Bench (Mac or Linux)
-        if: runner.os != 'Windows'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          KERA_BENCH_MODELS: ${{ vars[format('KERA_BENCH_MODELS_{0}', inputs.runner)] }}
-        run: bash scripts/bench-runner.sh bench-out "${{ inputs.tag }}" "${{ inputs.label }}"
-
-      - uses: actions/upload-artifact@v7
-        with:
-          name: bench-${{ inputs.runner }}
-          path: bench-out/*.json
-          retention-days: 90
-
-  compare:
-    needs: bench
+  disabled:
+    if: false
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v6
-
-      - uses: actions/download-artifact@v8
-        with:
-          name: bench-${{ inputs.runner }}
-          path: after
-
-      # the previous successful run of the bench on this machine, from either workflow
-      - name: Last results from this machine
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          mkdir -p before
-          for wf in nightly.yml hardware.yml; do
-            gh run list -R "$GITHUB_REPOSITORY" --workflow "$wf" --status success --limit 20 --json databaseId,createdAt \
-              --jq '.[] | "\(.createdAt) \(.databaseId)"'
-          done | sort -r | while read -r _ id; do
-            [ "$id" = "$GITHUB_RUN_ID" ] && continue
-            if gh run download "$id" -R "$GITHUB_REPOSITORY" -n "bench-${{ inputs.runner }}" -D before 2>/dev/null; then
-              echo "Comparing with run $id"
-              break
-            fi
-          done
-
-      - name: Compare
-        id: compare
-        run: |
-          echo "## Bench on the ${{ inputs.runner }} machine (${{ inputs.label }})" >> "$GITHUB_STEP_SUMMARY"
-          python3 bench/compare.py before after --summary "$GITHUB_STEP_SUMMARY"
-
-      - name: Open an issue
-        if: failure() && steps.compare.outcome == 'failure' && inputs.open_issue
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh issue create -R "$GITHUB_REPOSITORY" --label bug --label speed --label "${{ inputs.runner }}" \
-            --title "Nightly bench: slower on the ${{ inputs.runner }} machine" \
-            --body "The nightly bench found a model more than 3% slower than the last run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+      - run: echo "This workflow is disabled - no non-Linux hardware to verify."

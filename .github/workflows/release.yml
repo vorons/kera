@@ -2,8 +2,8 @@
 #   - push a tag v0.N.x;
 #   - push a commit whose message contains "[release v0.N.x]": the release is made from that commit and
 #     the tag created with it (agent sessions can push only to their branch, not tags).
-# Pre-releases (a dash in the version, e.g. v0.1.0-preview.1) build Windows and Linux; full milestone
-# releases also build the Mac app, the optional ROCm add-on for Windows and the DGX Spark download (Linux ARM64, CUDA). The release notes are docs/releases/<version>.md, the section 9 report.
+# Only the Linux download is built and published here: the other machines are not available to check
+# (18 Nov 2026). Their jobs are commented out below. The release notes are docs/releases/<version>.md.
 name: release
 
 on:
@@ -36,47 +36,49 @@ jobs:
             *) echo "No version found"; exit 1 ;;
           esac
 
-  windows:
-    needs: version
-    uses: ./.github/workflows/build-windows.yml
-    with:
-      package: true
-      version: ${{ needs.version.outputs.tag }}
-
+# DISABLED 2026-11-18: this fork is checked only on Linux. Windows, macOS, Spark, ROCm and
+# self-hosted-hardware jobs are commented out until that hardware exists to verify them.
+#   windows:
+#     needs: version
+#     uses: ./.github/workflows/build-windows.yml
+#     with:
+#       package: true
+#       version: ${{ needs.version.outputs.tag }}
   linux:
     needs: version
     uses: ./.github/workflows/build-linux.yml
     with:
       version: ${{ needs.version.outputs.tag }}
 
-  macos:
-    needs: version
-    if: ${{ !contains(needs.version.outputs.tag, '-') }}
-    uses: ./.github/workflows/build-macos.yml
-    with:
-      package: true
-      version: ${{ needs.version.outputs.tag }}
-
-  # the DGX Spark download (Linux ARM64 with CUDA, D-029): full releases, and a "[release ...]" commit with [spark]
-  spark:
-    needs: version
-    if: ${{ !contains(needs.version.outputs.tag, '-') || contains(github.event.head_commit.message, '[spark]') }}
-    uses: ./.github/workflows/build-linux-arm64-cuda.yml
-    with:
-      package: true
-      version: ${{ needs.version.outputs.tag }}
-
-  # the optional ROCm (HIP) add-on: for full milestone releases, and for a "[release ...]" commit with [hip] too
-  windows-hip:
-    needs: version
-    if: ${{ !contains(needs.version.outputs.tag, '-') || contains(github.event.head_commit.message, '[hip]') }}
-    uses: ./.github/workflows/build-windows-hip.yml
-    with:
-      version: ${{ needs.version.outputs.tag }}
-
+# DISABLED 2026-11-18: this fork is checked only on Linux. Windows, macOS, Spark, ROCm and
+# self-hosted-hardware jobs are commented out until that hardware exists to verify them.
+#   macos:
+#     needs: version
+#     if: ${{ !contains(needs.version.outputs.tag, '-') }}
+#     uses: ./.github/workflows/build-macos.yml
+#     with:
+#       package: true
+#       version: ${{ needs.version.outputs.tag }}
+#
+#   # the DGX Spark download (Linux ARM64 with CUDA, D-029): full releases, and a "[release ...]" commit with [spark]
+#   spark:
+#     needs: version
+#     if: ${{ !contains(needs.version.outputs.tag, '-') || contains(github.event.head_commit.message, '[spark]') }}
+#     uses: ./.github/workflows/build-linux-arm64-cuda.yml
+#     with:
+#       package: true
+#       version: ${{ needs.version.outputs.tag }}
+#
+#   # the optional ROCm (HIP) add-on: for full milestone releases, and for a "[release ...]" commit with [hip] too
+#   windows-hip:
+#     needs: version
+#     if: ${{ !contains(needs.version.outputs.tag, '-') || contains(github.event.head_commit.message, '[hip]') }}
+#     uses: ./.github/workflows/build-windows-hip.yml
+#     with:
+#       version: ${{ needs.version.outputs.tag }}
   publish:
-    needs: [version, windows, linux, macos, windows-hip, spark]
-    if: ${{ always() && needs.version.result == 'success' && needs.windows.result == 'success' && needs.linux.result == 'success' && (needs.macos.result == 'success' || needs.macos.result == 'skipped') && (needs.windows-hip.result == 'success' || needs.windows-hip.result == 'skipped') && (needs.spark.result == 'success' || needs.spark.result == 'skipped') }}
+    needs: [version, linux]
+    if: ${{ always() && needs.version.result == 'success' && needs.linux.result == 'success' }}
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6

@@ -1,17 +1,29 @@
-# The Mac build and tests, on demand. The spec's nightly Mac job is for a `mac` runner on the owner's
-# MacBook, which costs no minutes; on GitHub's own Mac machines (about 10x the minutes) it would use up
-# the free allowance in days, so it only runs when started by hand or for a release (D-011).
-name: mac
+# DISABLED 2026-11-18: this fork is checked only on Linux. Windows, macOS, Spark, ROCm and
+# self-hosted-hardware jobs are commented out until that hardware exists to verify them.
+# # The Mac build and tests, on demand. The spec's nightly Mac job is for a `mac` runner on the owner's
+# # MacBook, which costs no minutes; on GitHub's own Mac machines (about 10x the minutes) it would use up
+# # the free allowance in days, so it only runs when started by hand or for a release (D-011).
+# name: mac
+#
+# on:
+#   workflow_dispatch:
+#
+# permissions:
+#   contents: read
+#
+# jobs:
+#   macos:
+#     uses: ./.github/workflows/build-macos.yml
+#     with:
+#       package: true
+#       version: dev
 
+name: mac
 on:
   workflow_dispatch:
-
-permissions:
-  contents: read
-
 jobs:
-  macos:
-    uses: ./.github/workflows/build-macos.yml
-    with:
-      package: true
-      version: dev
+  disabled:
+    if: false
+    runs-on: ubuntu-24.04
+    steps:
+      - run: echo "This workflow is disabled - no non-Linux hardware to verify."

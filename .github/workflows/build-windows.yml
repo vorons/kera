@@ -1,179 +1,191 @@
-# Windows x64 build with Vulkan (the Minisforum's graphics chip), its tests, and the download zip.
-# Called by ci.yml and release.yml. Modelled on llama.cpp's own Windows release job (clang in the
-# Visual Studio environment, so ccache works; Vulkan SDK from LunarG; CPU back-end variants loaded at
-# run time, so Zen 5's AVX-512 is used where it exists).
+# DISABLED 2026-11-18: this fork is checked only on Linux. Windows, macOS, Spark, ROCm and
+# self-hosted-hardware jobs are commented out until that hardware exists to verify them.
+# # Windows x64 build with Vulkan (the Minisforum's graphics chip), its tests, and the download zip.
+# # Called by ci.yml and release.yml. Modelled on llama.cpp's own Windows release job (clang in the
+# # Visual Studio environment, so ccache works; Vulkan SDK from LunarG; CPU back-end variants loaded at
+# # run time, so Zen 5's AVX-512 is used where it exists).
+# name: build-windows
+#
+# on:
+#   workflow_call:
+#     inputs:
+#       package:
+#         description: Make the download zip
+#         type: boolean
+#         default: false
+#       version:
+#         description: Version name for the zip
+#         type: string
+#         default: dev
+#
+# permissions:
+#   contents: read
+#
+# jobs:
+#   windows:
+#     runs-on: windows-2025-vs2026
+#     timeout-minutes: 120
+#     env:
+#       VULKAN_VERSION: 1.4.357.0
+#     steps:
+#       - uses: actions/checkout@v6
+#
+#       - name: Install Vulkan SDK
+#         run: |
+#           curl.exe -sSfL -o $env:RUNNER_TEMP/VulkanSDK-Installer.exe "https://sdk.lunarg.com/sdk/download/${env:VULKAN_VERSION}/windows/vulkansdk-windows-X64-${env:VULKAN_VERSION}.exe"
+#           & "$env:RUNNER_TEMP\VulkanSDK-Installer.exe" --accept-licenses --default-answer --confirm-command install
+#           Add-Content $env:GITHUB_ENV "VULKAN_SDK=C:\VulkanSDK\${env:VULKAN_VERSION}"
+#           Add-Content $env:GITHUB_PATH "C:\VulkanSDK\${env:VULKAN_VERSION}\bin"
+#
+#       - name: Install Ninja
+#         run: choco install ninja --no-progress
+#
+#       - name: ccache
+#         uses: ggml-org/ccache-action@v1.2.24
+#         with:
+#           key: kera-windows-vulkan
+#           evict-old-files: 1d
+#
+#       - name: Build
+#         shell: cmd
+#         run: |
+#           call "C:\Program Files\Microsoft Visual Studio\18\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64
+#           cmake -S . -B build -G "Ninja Multi-Config" ^
+#             -D CMAKE_TOOLCHAIN_FILE=third_party/llama.cpp/cmake/x64-windows-llvm.cmake ^
+#             -DBUILD_SHARED_LIBS=ON ^
+#             -DGGML_NATIVE=OFF ^
+#             -DGGML_BACKEND_DL=ON ^
+#             -DGGML_CPU_ALL_VARIANTS=ON ^
+#             -DGGML_OPENMP=ON ^
+#             -DGGML_OPENMP_FETCH=ON ^
+#             -DGGML_VULKAN=ON ^
+#             -DLLAMA_OPENSSL=OFF ^
+#             -DKERA_WARNINGS_AS_ERRORS=ON
+#           if errorlevel 1 exit /b 1
+#           cmake --build build --config Release -j %NUMBER_OF_PROCESSORS%
+#           if errorlevel 1 exit /b 1
+#           rem the C++ runtime that matches this compiler, for the Package step
+#           echo VCToolsRedistDir=%VCToolsRedistDir%>> "%GITHUB_ENV%"
+#
+#       - name: Unit tests
+#         run: ctest --test-dir build -C Release --output-on-failure
+#
+#       - name: App smoke test
+#         run: |
+#           $env:KERA_HOME = "$env:RUNNER_TEMP\kera"
+#           .\build\bin\Release\kera.exe setup --quick
+#           if ($LASTEXITCODE -ne 0) { exit 1 }
+#           $app = Start-Process -FilePath .\build\bin\Release\kera.exe -ArgumentList "app","--no-browser","--port","8341" -PassThru
+#           Start-Sleep -Seconds 4
+#           $s = Invoke-RestMethod http://127.0.0.1:8341/api/status
+#           Stop-Process -Id $app.Id
+#           if (-not $s.profile) { Write-Error "the app has no machine profile"; exit 1 }
+#           Write-Host ($s.explain -join "`n")
+#
+#       - name: Package
+#         if: ${{ inputs.package }}
+#         run: |
+#           $name = "kera-${{ inputs.version }}-windows-x64"
+#           $dir = "$env:RUNNER_TEMP\$name"
+#           New-Item -ItemType Directory -Force $dir | Out-Null
+#           Copy-Item build\bin\Release\kera.exe $dir
+#           Get-ChildItem build\bin\Release\*.dll | Copy-Item -Destination $dir
+#           # Microsoft's C++ runtime, app-local, so Kera runs on PCs that don't have it installed. It must be
+#           # the desktop runtime of the compiler's own version: the redist folder also holds OneCore builds
+#           # (onecore\x64\...), and kera.exe crashed at start (0xC0000005) with those next to it.
+#           $redist = $env:VCToolsRedistDir
+#           if (-not $redist) {
+#             $redist = (Get-ChildItem "C:\Program Files\Microsoft Visual Studio\18\Enterprise\VC\Redist\MSVC" -Directory |
+#                        Where-Object { $_.Name -match '^\d+\.\d+\.\d+$' } |
+#                        Sort-Object { [version]$_.Name } -Descending | Select-Object -First 1).FullName
+#           }
+#           $crt = Get-ChildItem (Join-Path $redist "x64") -Directory | Where-Object { $_.Name -match '^Microsoft\.VC\d+\.CRT$' } | Select-Object -First 1
+#           if (-not $crt) { Write-Error "C++ runtime folder not found under $redist"; exit 1 }
+#           Write-Host "C++ runtime: $($crt.FullName)"
+#           Copy-Item "$($crt.FullName)\*.dll" $dir
+#           # the image engine (D-027), in a folder of its own: its own ggml DLLs share names with llama.cpp's, and a
+#           # program finds the DLLs next to it first (so it needs the C++ runtime there too)
+#           New-Item -ItemType Directory -Force "$dir\image" | Out-Null
+#           Copy-Item build\bin\image\*.exe, build\bin\image\*.dll "$dir\image"
+#           Copy-Item "$($crt.FullName)\*.dll" "$dir\image"
+#           # the music engine (D-028), the same way
+#           New-Item -ItemType Directory -Force "$dir\music" | Out-Null
+#           Copy-Item build\bin\music\*.exe, build\bin\music\*.dll "$dir\music"
+#           Copy-Item "$($crt.FullName)\*.dll" "$dir\music"
+#           # the 3D and sound-effect engines (D-031), the same way
+#           foreach ($engine in "3d", "sfx") {
+#             New-Item -ItemType Directory -Force "$dir\$engine" | Out-Null
+#             Copy-Item "build\bin\$engine\*.exe", "build\bin\$engine\*.dll" "$dir\$engine"
+#             Copy-Item "$($crt.FullName)\*.dll" "$dir\$engine"
+#           }
+#           Copy-Item packaging\windows\README.txt $dir
+#           Copy-Item LICENSE "$dir\LICENSE.txt"
+#           Copy-Item NOTICE "$dir\NOTICE.txt"
+#           Copy-Item build\generated\THIRD_PARTY_LICENSES.txt $dir
+#           python packaging\copy_finetune.py $dir
+#           Compress-Archive -Path $dir -DestinationPath "$name.zip"
+#           Get-ChildItem $dir | Format-Table Name, Length
+#
+#       # The owner's PC has no compilers or SDKs: run the download with only Windows itself on the PATH, so
+#       # a DLL that is missing from the zip (such as LLVM's OpenMP runtime) fails here and not there
+#       - name: Check the download runs on its own
+#         if: ${{ inputs.package }}
+#         run: |
+#           $dir = "$env:RUNNER_TEMP\kera-${{ inputs.version }}-windows-x64"
+#           $env:PATH = "C:\Windows\System32;C:\Windows"
+#           $env:KERA_HOME = "$env:RUNNER_TEMP\kera-standalone"
+#           & "$dir\kera.exe" version
+#           if ($LASTEXITCODE -ne 0) {
+#             # 0xC0000135: a DLL is missing; 0xC0000005: a crash, such as from a mismatched C++ runtime
+#             Write-Host ("kera.exe exit code 0x{0:X8}" -f $LASTEXITCODE)
+#             Write-Host ("msvcp140.dll in the download: " + (Get-Item "$dir\msvcp140.dll").VersionInfo.FileVersion)
+#             Write-Host ("msvcp140.dll in System32: " + (Get-Item "C:\Windows\System32\msvcp140.dll").VersionInfo.FileVersion)
+#             $dumpbin = Get-ChildItem "C:\Program Files\Microsoft Visual Studio\18\Enterprise\VC\Tools\MSVC\*\bin\Hostx64\x64\dumpbin.exe" | Select-Object -First 1
+#             Get-ChildItem $dir -Include *.exe,*.dll -Recurse | ForEach-Object { & $dumpbin.FullName /nologo /dependents $_.FullName | Select-String "\.dll" }
+#             Write-Error "kera.exe failed to start from the download folder"; exit 1
+#           }
+#           $out = & "$dir\kera.exe" setup --quick --no-disk --json
+#           if ($LASTEXITCODE -ne 0) { Write-Error ("kera setup failed from the download folder: 0x{0:X8}" -f $LASTEXITCODE); exit 1 }
+#           $p = ($out -join "`n") | ConvertFrom-Json
+#           if (-not ($p.cpu_q4_gbps -gt 0)) { Write-Error "the CPU back-end didn't load from the download folder"; exit 1 }
+#           Write-Host "CPU back-end loaded from the download folder: $($p.cpu_q4_gbps) GB/s on 4-bit weights"
+#           & "$dir\image\sd-cli.exe" --help | Out-Null
+#           if ($LASTEXITCODE -ne 0) { Write-Error ("the image engine didn't start from the download folder: 0x{0:X8}" -f $LASTEXITCODE); exit 1 }
+#           # the music programs end with 1 after their usage text; a missing DLL ends them before it
+#           $ErrorActionPreference = "Continue"   # its usage text is on stderr
+#           $usage = (& "$dir\music\ace-synth.exe" --help 2>&1 | Out-String)
+#           $ErrorActionPreference = "Stop"
+#           if ($usage -notmatch "Usage:") { Write-Error ("the music engine didn't start from the download folder: 0x{0:X8}" -f $LASTEXITCODE); exit 1 }
+#           # the 3D and sound-effect engines (D-031): their usage text, which a missing DLL would stop before
+#           $ErrorActionPreference = "Continue"
+#           $usage3d = (& "$dir\3d\trellis-cli.exe" --help 2>&1 | Out-String)
+#           $usageSfx = (& "$dir\sfx\audiocpp_cli.exe" --help 2>&1 | Out-String)
+#           $ErrorActionPreference = "Stop"
+#           if ($usage3d -notmatch "usage:") { Write-Error "the 3D engine didn't start from the download folder"; exit 1 }
+#           if ($usageSfx -notmatch "--task") { Write-Error "the sound-effect engine didn't start from the download folder"; exit 1 }
+#           # the engines read paths in UTF-8 (a folder under C:\Users\José): their manifest says so (D-028)
+#           foreach ($exe in "image\sd-cli.exe", "image\sd-server.exe", "music\ace-lm.exe", "music\ace-synth.exe", "music\ace-server.exe", "3d\trellis-cli.exe", "sfx\audiocpp_cli.exe") {
+#             if (-not (Select-String -Path "$dir\$exe" -Pattern "activeCodePage" -SimpleMatch -Quiet)) {
+#               Write-Error "$exe has no UTF-8 code page in its manifest"; exit 1
+#             }
+#           }
+#           $lic = & "$dir\kera.exe" licenses | Select-String -Quiet "License for llama.cpp"
+#           if (-not $lic) { Write-Error "kera licenses is missing the third-party licences"; exit 1 }
+#
+#       - name: Upload the download
+#         if: ${{ inputs.package && !cancelled() }}
+#         uses: actions/upload-artifact@v7
+#         with:
+#           name: kera-windows-x64
+#           path: kera-${{ inputs.version }}-windows-x64.zip
+#           retention-days: 3
+
 name: build-windows
-
 on:
-  workflow_call:
-    inputs:
-      package:
-        description: Make the download zip
-        type: boolean
-        default: false
-      version:
-        description: Version name for the zip
-        type: string
-        default: dev
-
-permissions:
-  contents: read
-
+  workflow_dispatch:
 jobs:
-  windows:
-    runs-on: windows-2025-vs2026
-    timeout-minutes: 120
-    env:
-      VULKAN_VERSION: 1.4.357.0
+  disabled:
+    if: false
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v6
-
-      - name: Install Vulkan SDK
-        run: |
-          curl.exe -sSfL -o $env:RUNNER_TEMP/VulkanSDK-Installer.exe "https://sdk.lunarg.com/sdk/download/${env:VULKAN_VERSION}/windows/vulkansdk-windows-X64-${env:VULKAN_VERSION}.exe"
-          & "$env:RUNNER_TEMP\VulkanSDK-Installer.exe" --accept-licenses --default-answer --confirm-command install
-          Add-Content $env:GITHUB_ENV "VULKAN_SDK=C:\VulkanSDK\${env:VULKAN_VERSION}"
-          Add-Content $env:GITHUB_PATH "C:\VulkanSDK\${env:VULKAN_VERSION}\bin"
-
-      - name: Install Ninja
-        run: choco install ninja --no-progress
-
-      - name: ccache
-        uses: ggml-org/ccache-action@v1.2.24
-        with:
-          key: kera-windows-vulkan
-          evict-old-files: 1d
-
-      - name: Build
-        shell: cmd
-        run: |
-          call "C:\Program Files\Microsoft Visual Studio\18\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64
-          cmake -S . -B build -G "Ninja Multi-Config" ^
-            -D CMAKE_TOOLCHAIN_FILE=third_party/llama.cpp/cmake/x64-windows-llvm.cmake ^
-            -DBUILD_SHARED_LIBS=ON ^
-            -DGGML_NATIVE=OFF ^
-            -DGGML_BACKEND_DL=ON ^
-            -DGGML_CPU_ALL_VARIANTS=ON ^
-            -DGGML_OPENMP=ON ^
-            -DGGML_OPENMP_FETCH=ON ^
-            -DGGML_VULKAN=ON ^
-            -DLLAMA_OPENSSL=OFF ^
-            -DKERA_WARNINGS_AS_ERRORS=ON
-          if errorlevel 1 exit /b 1
-          cmake --build build --config Release -j %NUMBER_OF_PROCESSORS%
-          if errorlevel 1 exit /b 1
-          rem the C++ runtime that matches this compiler, for the Package step
-          echo VCToolsRedistDir=%VCToolsRedistDir%>> "%GITHUB_ENV%"
-
-      - name: Unit tests
-        run: ctest --test-dir build -C Release --output-on-failure
-
-      - name: App smoke test
-        run: |
-          $env:KERA_HOME = "$env:RUNNER_TEMP\kera"
-          .\build\bin\Release\kera.exe setup --quick
-          if ($LASTEXITCODE -ne 0) { exit 1 }
-          $app = Start-Process -FilePath .\build\bin\Release\kera.exe -ArgumentList "app","--no-browser","--port","8341" -PassThru
-          Start-Sleep -Seconds 4
-          $s = Invoke-RestMethod http://127.0.0.1:8341/api/status
-          Stop-Process -Id $app.Id
-          if (-not $s.profile) { Write-Error "the app has no machine profile"; exit 1 }
-          Write-Host ($s.explain -join "`n")
-
-      - name: Package
-        if: ${{ inputs.package }}
-        run: |
-          $name = "kera-${{ inputs.version }}-windows-x64"
-          $dir = "$env:RUNNER_TEMP\$name"
-          New-Item -ItemType Directory -Force $dir | Out-Null
-          Copy-Item build\bin\Release\kera.exe $dir
-          Get-ChildItem build\bin\Release\*.dll | Copy-Item -Destination $dir
-          # Microsoft's C++ runtime, app-local, so Kera runs on PCs that don't have it installed. It must be
-          # the desktop runtime of the compiler's own version: the redist folder also holds OneCore builds
-          # (onecore\x64\...), and kera.exe crashed at start (0xC0000005) with those next to it.
-          $redist = $env:VCToolsRedistDir
-          if (-not $redist) {
-            $redist = (Get-ChildItem "C:\Program Files\Microsoft Visual Studio\18\Enterprise\VC\Redist\MSVC" -Directory |
-                       Where-Object { $_.Name -match '^\d+\.\d+\.\d+$' } |
-                       Sort-Object { [version]$_.Name } -Descending | Select-Object -First 1).FullName
-          }
-          $crt = Get-ChildItem (Join-Path $redist "x64") -Directory | Where-Object { $_.Name -match '^Microsoft\.VC\d+\.CRT$' } | Select-Object -First 1
-          if (-not $crt) { Write-Error "C++ runtime folder not found under $redist"; exit 1 }
-          Write-Host "C++ runtime: $($crt.FullName)"
-          Copy-Item "$($crt.FullName)\*.dll" $dir
-          # the image engine (D-027), in a folder of its own: its own ggml DLLs share names with llama.cpp's, and a
-          # program finds the DLLs next to it first (so it needs the C++ runtime there too)
-          New-Item -ItemType Directory -Force "$dir\image" | Out-Null
-          Copy-Item build\bin\image\*.exe, build\bin\image\*.dll "$dir\image"
-          Copy-Item "$($crt.FullName)\*.dll" "$dir\image"
-          # the music engine (D-028), the same way
-          New-Item -ItemType Directory -Force "$dir\music" | Out-Null
-          Copy-Item build\bin\music\*.exe, build\bin\music\*.dll "$dir\music"
-          Copy-Item "$($crt.FullName)\*.dll" "$dir\music"
-          # the 3D and sound-effect engines (D-031), the same way
-          foreach ($engine in "3d", "sfx") {
-            New-Item -ItemType Directory -Force "$dir\$engine" | Out-Null
-            Copy-Item "build\bin\$engine\*.exe", "build\bin\$engine\*.dll" "$dir\$engine"
-            Copy-Item "$($crt.FullName)\*.dll" "$dir\$engine"
-          }
-          Copy-Item packaging\windows\README.txt $dir
-          Copy-Item LICENSE "$dir\LICENSE.txt"
-          Copy-Item NOTICE "$dir\NOTICE.txt"
-          Copy-Item build\generated\THIRD_PARTY_LICENSES.txt $dir
-          python packaging\copy_finetune.py $dir
-          Compress-Archive -Path $dir -DestinationPath "$name.zip"
-          Get-ChildItem $dir | Format-Table Name, Length
-
-      # The owner's PC has no compilers or SDKs: run the download with only Windows itself on the PATH, so
-      # a DLL that is missing from the zip (such as LLVM's OpenMP runtime) fails here and not there
-      - name: Check the download runs on its own
-        if: ${{ inputs.package }}
-        run: |
-          $dir = "$env:RUNNER_TEMP\kera-${{ inputs.version }}-windows-x64"
-          $env:PATH = "C:\Windows\System32;C:\Windows"
-          $env:KERA_HOME = "$env:RUNNER_TEMP\kera-standalone"
-          & "$dir\kera.exe" version
-          if ($LASTEXITCODE -ne 0) {
-            # 0xC0000135: a DLL is missing; 0xC0000005: a crash, such as from a mismatched C++ runtime
-            Write-Host ("kera.exe exit code 0x{0:X8}" -f $LASTEXITCODE)
-            Write-Host ("msvcp140.dll in the download: " + (Get-Item "$dir\msvcp140.dll").VersionInfo.FileVersion)
-            Write-Host ("msvcp140.dll in System32: " + (Get-Item "C:\Windows\System32\msvcp140.dll").VersionInfo.FileVersion)
-            $dumpbin = Get-ChildItem "C:\Program Files\Microsoft Visual Studio\18\Enterprise\VC\Tools\MSVC\*\bin\Hostx64\x64\dumpbin.exe" | Select-Object -First 1
-            Get-ChildItem $dir -Include *.exe,*.dll -Recurse | ForEach-Object { & $dumpbin.FullName /nologo /dependents $_.FullName | Select-String "\.dll" }
-            Write-Error "kera.exe failed to start from the download folder"; exit 1
-          }
-          $out = & "$dir\kera.exe" setup --quick --no-disk --json
-          if ($LASTEXITCODE -ne 0) { Write-Error ("kera setup failed from the download folder: 0x{0:X8}" -f $LASTEXITCODE); exit 1 }
-          $p = ($out -join "`n") | ConvertFrom-Json
-          if (-not ($p.cpu_q4_gbps -gt 0)) { Write-Error "the CPU back-end didn't load from the download folder"; exit 1 }
-          Write-Host "CPU back-end loaded from the download folder: $($p.cpu_q4_gbps) GB/s on 4-bit weights"
-          & "$dir\image\sd-cli.exe" --help | Out-Null
-          if ($LASTEXITCODE -ne 0) { Write-Error ("the image engine didn't start from the download folder: 0x{0:X8}" -f $LASTEXITCODE); exit 1 }
-          # the music programs end with 1 after their usage text; a missing DLL ends them before it
-          $ErrorActionPreference = "Continue"   # its usage text is on stderr
-          $usage = (& "$dir\music\ace-synth.exe" --help 2>&1 | Out-String)
-          $ErrorActionPreference = "Stop"
-          if ($usage -notmatch "Usage:") { Write-Error ("the music engine didn't start from the download folder: 0x{0:X8}" -f $LASTEXITCODE); exit 1 }
-          # the 3D and sound-effect engines (D-031): their usage text, which a missing DLL would stop before
-          $ErrorActionPreference = "Continue"
-          $usage3d = (& "$dir\3d\trellis-cli.exe" --help 2>&1 | Out-String)
-          $usageSfx = (& "$dir\sfx\audiocpp_cli.exe" --help 2>&1 | Out-String)
-          $ErrorActionPreference = "Stop"
-          if ($usage3d -notmatch "usage:") { Write-Error "the 3D engine didn't start from the download folder"; exit 1 }
-          if ($usageSfx -notmatch "--task") { Write-Error "the sound-effect engine didn't start from the download folder"; exit 1 }
-          # the engines read paths in UTF-8 (a folder under C:\Users\José): their manifest says so (D-028)
-          foreach ($exe in "image\sd-cli.exe", "image\sd-server.exe", "music\ace-lm.exe", "music\ace-synth.exe", "music\ace-server.exe", "3d\trellis-cli.exe", "sfx\audiocpp_cli.exe") {
-            if (-not (Select-String -Path "$dir\$exe" -Pattern "activeCodePage" -SimpleMatch -Quiet)) {
-              Write-Error "$exe has no UTF-8 code page in its manifest"; exit 1
-            }
-          }
-          $lic = & "$dir\kera.exe" licenses | Select-String -Quiet "License for llama.cpp"
-          if (-not $lic) { Write-Error "kera licenses is missing the third-party licences"; exit 1 }
-
-      - name: Upload the download
-        if: ${{ inputs.package && !cancelled() }}
-        uses: actions/upload-artifact@v7
-        with:
-          name: kera-windows-x64
-          path: kera-${{ inputs.version }}-windows-x64.zip
-          retention-days: 3
+      - run: echo "This workflow is disabled - no non-Linux hardware to verify."

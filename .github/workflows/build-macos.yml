@@ -1,89 +1,101 @@
-# macOS (Apple Silicon, Metal) build, its tests, and the Kera.app download. Called by ci.yml (commits
-# marked [mac]) and release.yml (full milestone releases). Mac minutes cost about ten times Linux ones,
-# so this never runs on a schedule on GitHub's machines.
+# DISABLED 2026-11-18: this fork is checked only on Linux. Windows, macOS, Spark, ROCm and
+# self-hosted-hardware jobs are commented out until that hardware exists to verify them.
+# # macOS (Apple Silicon, Metal) build, its tests, and the Kera.app download. Called by ci.yml (commits
+# # marked [mac]) and release.yml (full milestone releases). Mac minutes cost about ten times Linux ones,
+# # so this never runs on a schedule on GitHub's machines.
+# name: build-macos
+#
+# on:
+#   workflow_call:
+#     inputs:
+#       package:
+#         type: boolean
+#         default: false
+#       version:
+#         type: string
+#         default: dev
+#
+# permissions:
+#   contents: read
+#
+# jobs:
+#   macos:
+#     runs-on: macos-15
+#     timeout-minutes: 90
+#     steps:
+#       - uses: actions/checkout@v6
+#
+#       - name: Install Ninja
+#         run: brew install ninja
+#
+#       - name: ccache
+#         uses: ggml-org/ccache-action@v1.2.24
+#         with:
+#           key: kera-macos-metal
+#           evict-old-files: 1d
+#
+#       - name: Build
+#         run: |
+#           cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+#             -DBUILD_SHARED_LIBS=OFF -DGGML_NATIVE=OFF -DLLAMA_OPENSSL=OFF \
+#             -DCMAKE_OSX_DEPLOYMENT_TARGET=13.3 -DKERA_WARNINGS_AS_ERRORS=ON
+#           cmake --build build -j $(sysctl -n hw.logicalcpu)
+#
+#       - name: Unit tests
+#         run: ctest --test-dir build --output-on-failure
+#
+#       - name: App smoke test
+#         run: |
+#           export KERA_HOME="$RUNNER_TEMP/kera"
+#           ./build/bin/kera setup --quick
+#           ./build/bin/kera app --no-browser --port 8341 & pid=$!
+#           sleep 4
+#           curl -sf http://127.0.0.1:8341/api/status | python3 -c "import json,sys; j=json.load(sys.stdin); assert j['profile']; print('\n'.join(j['explain']))"
+#           kill $pid
+#
+#       - name: Package
+#         if: ${{ inputs.package }}
+#         run: |
+#           name=kera-${{ inputs.version }}-macos-arm64
+#           app="$RUNNER_TEMP/$name/Kera.app"
+#           mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources"
+#           cp build/bin/kera "$app/Contents/MacOS/kera"
+#           # the image engine (D-027): its programs and its own copy of ggml, by the names they load
+#           mkdir -p "$app/Contents/MacOS/image"
+#           cp build/bin/image/sd-cli build/bin/image/sd-server build/bin/image/libstable-diffusion.dylib \
+#              build/bin/image/libggml*.0.dylib "$app/Contents/MacOS/image/"
+#           "$app/Contents/MacOS/image/sd-cli" --help > /dev/null
+#           # the music engine (D-028), the same way
+#           mkdir -p "$app/Contents/MacOS/music"
+#           cp build/bin/music/ace-lm build/bin/music/ace-synth build/bin/music/ace-server "$app/Contents/MacOS/music/"
+#           cp -P build/bin/music/libggml* "$app/Contents/MacOS/music/"
+#           "$app/Contents/MacOS/music/ace-synth" --help 2>&1 | grep -q "Usage:"
+#           # the 3D engine (D-031), the same way; the sound-effect engine is one program here (its ggml is built in)
+#           mkdir -p "$app/Contents/MacOS/3d" "$app/Contents/MacOS/sfx"
+#           cp build/bin/3d/trellis-cli "$app/Contents/MacOS/3d/"
+#           cp -P build/bin/3d/libggml* "$app/Contents/MacOS/3d/"
+#           "$app/Contents/MacOS/3d/trellis-cli" --help 2>&1 | grep -q "usage:"
+#           cp build/bin/sfx/audiocpp_cli build/bin/sfx/audiocpp_server "$app/Contents/MacOS/sfx/"
+#           "$app/Contents/MacOS/sfx/audiocpp_cli" --help 2>&1 | grep -q -- "--task"
+#           cp assets/brand/icons/kera.icns "$app/Contents/Resources/kera.icns"
+#           sed "s/@VERSION@/${{ inputs.version }}/" packaging/macos/Info.plist > "$app/Contents/Info.plist"
+#           cp packaging/macos/README.txt LICENSE NOTICE build/generated/THIRD_PARTY_LICENSES.txt "$RUNNER_TEMP/$name/"
+#           python3 packaging/copy_finetune.py "$app/Contents/Resources"
+#           (cd "$RUNNER_TEMP" && ditto -c -k --keepParent "$name" "$GITHUB_WORKSPACE/$name.zip")
+#
+#       - uses: actions/upload-artifact@v7
+#         if: ${{ inputs.package }}
+#         with:
+#           name: kera-macos-arm64
+#           path: kera-${{ inputs.version }}-macos-arm64.zip
+#           retention-days: 3
+
 name: build-macos
-
 on:
-  workflow_call:
-    inputs:
-      package:
-        type: boolean
-        default: false
-      version:
-        type: string
-        default: dev
-
-permissions:
-  contents: read
-
+  workflow_dispatch:
 jobs:
-  macos:
-    runs-on: macos-15
-    timeout-minutes: 90
+  disabled:
+    if: false
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v6
-
-      - name: Install Ninja
-        run: brew install ninja
-
-      - name: ccache
-        uses: ggml-org/ccache-action@v1.2.24
-        with:
-          key: kera-macos-metal
-          evict-old-files: 1d
-
-      - name: Build
-        run: |
-          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
-            -DBUILD_SHARED_LIBS=OFF -DGGML_NATIVE=OFF -DLLAMA_OPENSSL=OFF \
-            -DCMAKE_OSX_DEPLOYMENT_TARGET=13.3 -DKERA_WARNINGS_AS_ERRORS=ON
-          cmake --build build -j $(sysctl -n hw.logicalcpu)
-
-      - name: Unit tests
-        run: ctest --test-dir build --output-on-failure
-
-      - name: App smoke test
-        run: |
-          export KERA_HOME="$RUNNER_TEMP/kera"
-          ./build/bin/kera setup --quick
-          ./build/bin/kera app --no-browser --port 8341 & pid=$!
-          sleep 4
-          curl -sf http://127.0.0.1:8341/api/status | python3 -c "import json,sys; j=json.load(sys.stdin); assert j['profile']; print('\n'.join(j['explain']))"
-          kill $pid
-
-      - name: Package
-        if: ${{ inputs.package }}
-        run: |
-          name=kera-${{ inputs.version }}-macos-arm64
-          app="$RUNNER_TEMP/$name/Kera.app"
-          mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources"
-          cp build/bin/kera "$app/Contents/MacOS/kera"
-          # the image engine (D-027): its programs and its own copy of ggml, by the names they load
-          mkdir -p "$app/Contents/MacOS/image"
-          cp build/bin/image/sd-cli build/bin/image/sd-server build/bin/image/libstable-diffusion.dylib \
-             build/bin/image/libggml*.0.dylib "$app/Contents/MacOS/image/"
-          "$app/Contents/MacOS/image/sd-cli" --help > /dev/null
-          # the music engine (D-028), the same way
-          mkdir -p "$app/Contents/MacOS/music"
-          cp build/bin/music/ace-lm build/bin/music/ace-synth build/bin/music/ace-server "$app/Contents/MacOS/music/"
-          cp -P build/bin/music/libggml* "$app/Contents/MacOS/music/"
-          "$app/Contents/MacOS/music/ace-synth" --help 2>&1 | grep -q "Usage:"
-          # the 3D engine (D-031), the same way; the sound-effect engine is one program here (its ggml is built in)
-          mkdir -p "$app/Contents/MacOS/3d" "$app/Contents/MacOS/sfx"
-          cp build/bin/3d/trellis-cli "$app/Contents/MacOS/3d/"
-          cp -P build/bin/3d/libggml* "$app/Contents/MacOS/3d/"
-          "$app/Contents/MacOS/3d/trellis-cli" --help 2>&1 | grep -q "usage:"
-          cp build/bin/sfx/audiocpp_cli build/bin/sfx/audiocpp_server "$app/Contents/MacOS/sfx/"
-          "$app/Contents/MacOS/sfx/audiocpp_cli" --help 2>&1 | grep -q -- "--task"
-          cp assets/brand/icons/kera.icns "$app/Contents/Resources/kera.icns"
-          sed "s/@VERSION@/${{ inputs.version }}/" packaging/macos/Info.plist > "$app/Contents/Info.plist"
-          cp packaging/macos/README.txt LICENSE NOTICE build/generated/THIRD_PARTY_LICENSES.txt "$RUNNER_TEMP/$name/"
-          python3 packaging/copy_finetune.py "$app/Contents/Resources"
-          (cd "$RUNNER_TEMP" && ditto -c -k --keepParent "$name" "$GITHUB_WORKSPACE/$name.zip")
-
-      - uses: actions/upload-artifact@v7
-        if: ${{ inputs.package }}
-        with:
-          name: kera-macos-arm64
-          path: kera-${{ inputs.version }}-macos-arm64.zip
-          retention-days: 3
+      - run: echo "This workflow is disabled - no non-Linux hardware to verify."
