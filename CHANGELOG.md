@@ -6,6 +6,14 @@ the lossy modes the 0.1.0 previews had (opt-in) were removed in 0.1.3.
 
 ## Unreleased
 
+## 0.1.5.3 (2026-11-18)
+
+Patch release: llama.cpp b11619 -> b12500, with Kera's eight hooks carried over (saved chats, guess controller,
+streamed experts, per-request model defaults, reply shapes, chat sharing and late parameter filling). Kera's own
+answer path is unchanged: its IO batching and two fixes now in upstream were dropped in favour of upstream's.
+The N-009 greedy replay guard stays. Saved chats were adapted to upstream's shared-pointer checkpoints and new
+state-data type. Linux CI is green; graphics-chip checks and speed measurements still need the owner's hardware.
+
 ## 0.1.5.2 (2026-11-11)
 
 LTX video follows what you ask for (D-042). The DGX Spark download comes first, built on a DGX Spark; the other
