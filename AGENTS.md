@@ -10,6 +10,12 @@ Kera is a local AI engine and downloadable app built on llama.cpp. The full plan
    before writing code. Follow P4's "Needs" column. Never skip a gate.
 3. The GitHub fork is public by the owner's decision (18 Nov 2026; D-004 was cancelled). Push to it when
    asked; no visibility check is needed.
+4. Check `free -h` before any model test: this machine has 15 GB of RAM and an OOM killer, so do not start a
+   model without enough free memory. The owner runs the Clover-35B-A3B-Preview GGUF with expert streaming on
+   and on Vulkan, so any check of that model must use the same launch (replace the file path with the GGUF):
+   `kera serve --stream kera --stream-budget-gb 3000 --port 8080 -m <clover-gguf>`. Do not switch streaming off
+   or use a smaller budget when judging its answers; if the local build is CPU-only, rebuild with
+   `-DGGML_VULKAN=ON` first.
 
 ## The owner's rules (details in `docs/DECISIONS.md`, D-001 to D-010, D-033, D-034 and D-038)
 
