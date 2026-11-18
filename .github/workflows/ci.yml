@@ -75,8 +75,7 @@ jobs:
         run: |
           python tests/integration/test_kv_store.py --kera build/bin/kera --model "$RUNNER_TEMP/tiny/nemotron_h_moe.gguf"
           python tests/integration/test_kv_store.py --kera build/bin/kera --model "$RUNNER_TEMP/tiny/deepseek_v3_mla.gguf" --words 30 --port 8418
-          # the batched copy a graphics chip uses for saving and loading state (N-005), forced on for the CPU's tensors
-          KERA_IO_SPAN_TEST=1 python tests/integration/test_kv_store.py --kera build/bin/kera --model "$RUNNER_TEMP/tiny/nemotron_h_moe.gguf" --port 8419
+          # KERA_IO_SPAN_TEST is gone with b12500: upstream's batched tensor get/set is used everywhere now.
 
       - name: The model card's sampling per request (spec 4c item 2)
         run: |

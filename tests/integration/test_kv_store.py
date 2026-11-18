@@ -61,7 +61,7 @@ def main():
     ap.add_argument("--kera", required=True)
     ap.add_argument("--model", required=True)
     ap.add_argument("--port", type=int, default=8417)
-    ap.add_argument("--words", type=int, default=150, help="words per message (smaller for models with a short context)")
+    ap.add_argument("--words", type=int, default=60, help="words per message (small for a model with a short training context)")
     args = ap.parse_args()
     home = tempfile.mkdtemp(prefix="kera-kv-")
 
